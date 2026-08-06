@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const fallback = fallbackAnalytics();
   try {
-    if (!process.env.GA4_PROPERTY_ID || (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS)) throw new Error("Configura GA4_PROPERTY_ID y GOOGLE_SERVICE_ACCOUNT_JSON para activar Analytics.");
+    if (!process.env.GA4_PROPERTY_ID || (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS)) throw new Error("Configura GA4_PROPERTY_ID y GOOGLE_APPLICATION_CREDENTIALS (o GOOGLE_SERVICE_ACCOUNT_JSON) para activar Analytics.");
     const response: IntegrationResponse<typeof fallback> = { status: "live", data: await fetchAnalytics(), generatedAt: new Date().toISOString() };
     return NextResponse.json(response);
   } catch (error) {
