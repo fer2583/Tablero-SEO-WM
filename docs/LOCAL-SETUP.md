@@ -39,6 +39,21 @@ Con el servidor iniciado, prueba Analytics en `http://localhost:3000/api/integra
 curl http://localhost:3000/api/integrations/analytics
 ```
 
+## Filtros y verificación
+
+Los filtros del dashboard se guardan en la URL y se envían a ambas APIs. Ejemplo sin credenciales expuestas:
+
+```text
+/api/integrations/search-console?days=7&language=en&country=US&device=mobile&page=%2Fen%2Fservices
+/api/integrations/analytics?days=60&language=pt&country=PT&device=desktop
+```
+
+`days` acepta `7`, `28`, `60` o `90`; `country` usa códigos ISO de dos letras; `device` acepta `desktop`, `mobile` o `tablet`; `page` y `query` son opcionales para GSC. La comparación usa el período inmediatamente anterior de la misma duración.
+
+El idioma no es una dimensión nativa común a estas APIs: GSC aplica un filtro de URL sobre la dimensión `page` y GA4 sobre `landingPagePlusQueryString` (`/en/`, `/pt/` o una expresión para el idioma raíz ES). País y dispositivo se aplican como dimensiones de Google. La respuesta incluye `metadata.rows`, `metadata.lastResponseAt` y los filtros efectivos; la tarjeta “Cómo verificar datos” los muestra sin exponer credenciales.
+
+Las secciones Indexación, Auditoría técnica, Keywords, Contenido y Alertas continúan siendo demo y deben permanecer identificadas como tales. No representan una respuesta de Google ni una auditoría real.
+
 ## Live y Demo fallback
 
 - `status: "live"`: la API respondió con datos de Google usando las credenciales locales.

@@ -24,6 +24,11 @@ nav { display:grid;gap:4px; } nav a { display:flex;align-items:center;gap:12px;p
 /* Brand layer: keep semantic status colors distinct from Whalemate blue. */
 .topbar-logo { width: 142px; height: auto; display: block; margin-right: 20px; }
 .demo-dot { background: var(--brand-secondary); }
+.verification { display:flex; flex-wrap:wrap; gap:8px 16px; margin:12px 0 14px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fbfdff; color:var(--muted); font-size:10px; }
+.verification strong { color:var(--ink); }
+.integration-error { display:block; color:var(--error); margin-top:10px; }
+.spin { animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
 .demo-badge { border-color: var(--brand-secondary); background: var(--brand-soft); color: var(--brand-deep); }
 .kpi-icon.aqua, .legend-aqua { background: var(--brand-soft); color: var(--brand-primary); }
 .kpi-icon.violet, .kpi-icon.blue, .kpi-icon.cyan { background: #e8efff; color: var(--brand-secondary); }
