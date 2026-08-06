@@ -1,14 +1,15 @@
 import { ArrowRight, CalendarDays, CheckCircle2, ChevronRight, TrendingUp } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LineChart, Donut } from "@/components/charts";
-import { Card, CardHeader, Change, DemoBadge, FilterBar, SectionHeading, StatusPill } from "@/components/ui";
+import { Card, CardHeader, Change, FilterBar, SectionHeading, StatusPill } from "@/components/ui";
 import { alerts, clicks, conversions, impressions, kpis, landingPages, traffic } from "@/lib/mock-data";
+import { SummaryLive } from "@/components/integration-panels";
 
 export default function Home() {
   return (
     <DashboardShell>
       <SectionHeading eyebrow="Resumen ejecutivo" title="Buenos días, Javier" description="Una lectura rápida del rendimiento orgánico de Whalemate." action={<button className="outline-button"><CalendarDays size={16} /> 01 jun — 30 jun 2026 <ChevronRight size={14} /></button>} />
-      <div className="demo-banner"><DemoBadge /><span>Los datos mostrados son una maqueta funcional. No representan métricas reales.</span></div>
+      <div className="demo-banner"><SummaryLive /></div>
       <FilterBar />
       <div className="kpi-grid">{kpis.map((kpi) => <Card key={kpi.label} className="kpi-card"><div className={`kpi-icon ${kpi.color}`}><TrendingUp size={17} /></div><span className="kpi-label">{kpi.label}</span><strong>{kpi.value}</strong><Change value={kpi.change} /></Card>)}</div>
       <div className="dashboard-grid">

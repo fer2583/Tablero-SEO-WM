@@ -2,7 +2,11 @@ import { ArrowDownRight, ArrowUpRight, Info, LoaderCircle } from "lucide-react";
 import type { ReactNode } from "react";
 
 export function DemoBadge() {
-  return <span className="demo-badge"><span className="demo-dot" /> Datos demo · conectar GSC/GA4 en fase siguiente</span>;
+  return <span className="demo-badge"><span className="demo-dot" /> Demo fallback</span>;
+}
+
+export function DataSourceBadge({ live, error }: { live: boolean; error?: string }) {
+  return <span className={`demo-badge ${live ? "data-live" : ""}`} title={error}><span className="demo-dot" /> {live ? "Live" : "Demo fallback"}</span>;
 }
 
 export function SectionHeading({ eyebrow, title, description, action }: { eyebrow?: string; title: string; description?: string; action?: ReactNode }) {
