@@ -1,69 +1,28 @@
-import Image from "next/image";
+import { ArrowRight, CalendarDays, CheckCircle2, ChevronRight, TrendingUp } from "lucide-react";
+import { DashboardShell } from "@/components/dashboard-shell";
+import { LineChart, Donut } from "@/components/charts";
+import { Card, CardHeader, Change, DemoBadge, FilterBar, SectionHeading, StatusPill } from "@/components/ui";
+import { alerts, clicks, conversions, impressions, kpis, landingPages, traffic } from "@/lib/mock-data";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <DashboardShell>
+      <SectionHeading eyebrow="Resumen ejecutivo" title="Buenos días, Javier" description="Una lectura rápida del rendimiento orgánico de Whalemate." action={<button className="outline-button"><CalendarDays size={16} /> 01 jun — 30 jun 2026 <ChevronRight size={14} /></button>} />
+      <div className="demo-banner"><DemoBadge /><span>Los datos mostrados son una maqueta funcional. No representan métricas reales.</span></div>
+      <FilterBar />
+      <div className="kpi-grid">{kpis.map((kpi) => <Card key={kpi.label} className="kpi-card"><div className={`kpi-icon ${kpi.color}`}><TrendingUp size={17} /></div><span className="kpi-label">{kpi.label}</span><strong>{kpi.value}</strong><Change value={kpi.change} /></Card>)}</div>
+      <div className="dashboard-grid">
+        <Card className="wide-card"><CardHeader title="Tráfico orgánico" detail="Sesiones · últimos 30 días" action={<div className="legend"><span className="legend-aqua" /> Este periodo <span className="legend-muted" /> Periodo anterior</div>} /><LineChart values={traffic} secondary={clicks} /></Card>
+        <Card><CardHeader title="Health score" detail="Estado técnico del proyecto" /><div className="score-layout"><Donut /><div><strong className="score-number">87<span>/100</span></strong><p>Muy buen estado</p><Change value="+3 pts vs. periodo anterior" /></div></div><div className="score-footer"><span><i className="dot good" /> Saludable <b>82%</b></span><span><i className="dot warning" /> A revisar <b>18%</b></span></div></Card>
+      </div>
+      <div className="dashboard-grid second-row">
+        <Card className="wide-card"><CardHeader title="Clicks e impresiones" detail="Rendimiento en búsquedas" action={<button className="text-button">Ver Search Console <ArrowRight size={14} /></button>} /><LineChart values={clicks} secondary={impressions} color="#5e8bf7" /></Card>
+        <Card><CardHeader title="Conversiones" detail="Atribución orgánica" /><LineChart values={conversions} color="#f18462" height={150} /><div className="conversion-total"><strong>846</strong><Change value="+9,2%" /><span>conversiones demo</span></div></Card>
+      </div>
+      <div className="dashboard-grid tables-row">
+        <Card className="table-card"><CardHeader title="Landing pages principales" detail="Páginas que más tráfico orgánico generan" action={<button className="text-button">Ver todas <ArrowRight size={14} /></button>} /><div className="table-scroll"><table><thead><tr><th>Página</th><th>Clics</th><th>Impresiones</th><th>CTR</th><th>Posición</th><th>Idioma</th><th>Tendencia</th></tr></thead><tbody>{landingPages.map((page) => <tr key={page.page}><td><b>{page.page}</b><small>whalemate.com</small></td><td>{page.clicks}</td><td>{page.impressions}</td><td>{page.ctr}</td><td>{page.position}</td><td><span className="language">{page.language}</span></td><td><span className="trend-up">↗ {page.trend}</span></td></tr>)}</tbody></table></div></Card>
+        <Card><CardHeader title="Alertas recientes" detail="Lo que requiere atención" action={<button className="text-button">Ver todas <ArrowRight size={14} /></button>} /><div className="alert-list">{alerts.slice(0, 3).map((alert) => <div className="alert-item" key={alert.title}><div className={`severity ${alert.severity.toLowerCase()}`} /><div><b>{alert.title}</b><span>{alert.detail}</span></div><StatusPill tone={alert.severity.toLowerCase()}>{alert.severity}</StatusPill></div>)}</div><div className="all-clear"><CheckCircle2 size={16} /> 2 tareas completadas esta semana</div></Card>
+      </div>
+    </DashboardShell>
   );
 }
