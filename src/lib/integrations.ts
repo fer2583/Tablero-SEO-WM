@@ -72,7 +72,10 @@ export async function fetchAnalytics(filters: IntegrationFilters): Promise<Analy
   const organic: Filter = { fieldName: "sessionDefaultChannelGroup", stringFilter: { matchType: "EXACT", value: "Organic Search" } };
   const aiSource: Filter = { fieldName: "sessionSource", stringFilter: { matchType: "FULL_REGEXP", value: AI_REFERRAL_SOURCE_PATTERN } };
   const filtersFor = (): Filter[] => [filters.country !== "all" && { fieldName: "countryId", stringFilter: { matchType: "EXACT", value: filters.country } }, filters.device !== "all" && { fieldName: "deviceCategory", stringFilter: { matchType: "EXACT", value: filters.device } }, filters.language !== "all" && { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "FULL_REGEXP", value: filters.language === "en" ? "^/en(?:/|$)" : filters.language === "pt" ? "^/pt(?:/|$)" : "^/(?!en(?:/|$)|pt(?:/|$))" } }, filters.page && { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "CONTAINS", value: filters.page } }].filter(Boolean) as Filter[];
-  const dimensionFilter = (extra: Filter[] = []) => ({ andGroup: { expressions: [...extra.map((filter) => ({ filter })), ...filtersFor().map((filter) => ({ filter }))] } });
+  const dimensionFilter = (extra: Filter[] = []) => {
+    const filters = [...extra, ...filtersFor()];
+    return filters.length ? { andGroup: { expressions: filters.map((filter) => ({ filter })) } } : undefined;
+  };
   const run = (startDate: string, endDate: string, dimensions: string[], metrics: string[], extra: Filter[] = []) => client.properties.runReport({ property, requestBody: { dateRanges: [{ startDate, endDate }], dimensions: dimensions.map((name) => ({ name })), metrics: metrics.map((name) => ({ name })), dimensionFilter: dimensionFilter(extra), limit: "100" } });
   const warnings: string[] = [];
   const safeRun = async (label: string, start: string, end: string, dimensions: string[], metrics: string[], extra: Filter[] = []) => { try { return await run(start, end, dimensions, metrics, extra); } catch (error) { warnings.push(`${label}: ${error instanceof Error ? error.message : "GA4 rechazó la consulta."}`); return null; } };
