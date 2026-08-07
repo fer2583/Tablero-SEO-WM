@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getLatestAuditSnapshot } from "@/db/queries";
+import { getAuditHistory, getLatestAuditSnapshot } from "@/db/queries";
 import { databaseConfigured } from "@/lib/snapshot-refresh";
 import { SITE_URL } from "@/lib/site";
 import { runAudit } from "@/lib/audit";
@@ -18,7 +18,8 @@ export async function GET(request: Request) {
     }
     const latest = await getLatestAuditSnapshot(SITE_URL);
     if (!latest) return NextResponse.json({ status: "no_data", error: "No existe un snapshot de auditoría." }, { status: 404 });
-    return NextResponse.json(latest.snapshot, { headers: { "Cache-Control": "no-store, max-age=0", "X-Snapshot-State": "snapshot" } });
+    const history = await getAuditHistory(SITE_URL);
+    return NextResponse.json({ ...(latest.snapshot as object), history: history.length ? history : "no_data" }, { headers: { "Cache-Control": "no-store, max-age=0", "X-Snapshot-State": "snapshot" } });
   } catch (error) {
     const message = error instanceof Error ? error.message : "No se pudo ejecutar la auditoría.";
     return NextResponse.json({ error: /key|token|secret|credential|private/i.test(message) ? "La fuente no está disponible. Revisa la configuración del servidor." : message }, { status: 503 });

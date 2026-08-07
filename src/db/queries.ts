@@ -88,6 +88,15 @@ export async function getLatestAuditSnapshot(siteUrl: string) {
   return result.rows[0] ?? null;
 }
 
+export async function getAuditHistory(siteUrl: string) {
+  const result = await getDb().query<{ id: number; snapshotKey: string; status: string; completedAt: string | null }>(
+    `SELECT id, snapshot_key AS "snapshotKey", status, completed_at AS "completedAt"
+     FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 30`,
+    [siteUrl],
+  );
+  return result.rows;
+}
+
 export type IndexationSnapshotInput = {
   siteUrl: string;
   snapshotKey: string;
