@@ -14,4 +14,4 @@ export default function Home() {
   );
 }
 
-function SummaryHeading() { return <SectionHeading eyebrow="Resumen ejecutivo" title="Rendimiento orgánico" description="Una lectura rápida basada únicamente en fuentes conectadas." />; }
+function SummaryHeading() { return <SectionHeading eyebrow="Resumen ejecutivo" title="Rendimiento orgánico" description="Últimos 30 días vs. 30 días anteriores" />; }
