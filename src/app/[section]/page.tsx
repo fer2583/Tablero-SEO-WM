@@ -1,13 +1,14 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, FileSearch, LayoutGrid, Search } from "lucide-react";
+import { ArrowRight, CheckCircle2, LayoutGrid, Search } from "lucide-react";
 import { useParams } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Donut } from "@/components/charts";
-import { alerts, contentItems, keywords, technicalIssues } from "@/lib/mock-data";
+import { alerts, contentItems, keywords } from "@/lib/mock-data";
 import { Card, CardHeader, Change, DemoBadge, EmptyState, FilterBar, SectionHeading, StatusPill } from "@/components/ui";
 import { DataTable, type TableColumn } from "@/components/data-table";
 import { AnalyticsLive, SearchConsoleLive } from "@/components/integration-panels";
+import { AuditPanel } from "@/components/audit-panel";
 
 const titles: Record<string, [string, string, string]> = {
   "search-console": ["Search Console", "Rendimiento de búsqueda orgánica", "Consulta clicks, impresiones y oportunidades de visibilidad."],
@@ -31,7 +32,7 @@ function Analytics() { return <><FilterBar /><AnalyticsLive /></>; }
 
 function Indexing() { return <><div className="indexing-hero"><Card><div className="index-score"><Donut value={84} label="URLs válidas" /><div><span className="eyebrow">Cobertura demo</span><strong>1.284 <small>URLs válidas</small></strong><Change value="+4,6% vs. periodo anterior" /></div></div></Card><div className="index-stat-grid"><Metric label="Indexadas" value="1.284" change="+4,6%" /><Metric label="No indexadas" value="164" change="-8,2%" /><Metric label="Redirecciones" value="48" change="+2,1%" /><Metric label="Errores" value="12" change="-14,3%" /></div></div><Card><CardHeader title="Distribución de cobertura" detail="Estado de URLs detectadas en el sitemap" /><div className="coverage-list"><Coverage label="Indexadas" value="84%" count="1.284" tone="aqua" /><Coverage label="Excluidas correctamente" value="9%" count="136" tone="violet" /><Coverage label="Pendientes de revisión" value="5%" count="76" tone="orange" /><Coverage label="Errores" value="2%" count="12" tone="pink" /></div></Card><Card><EmptyState title="Integración de inspección pendiente" detail="Conecta Search Console para revisar cobertura URL a URL en la siguiente fase." /></Card></>; }
 
-function TechnicalAudit() { return <><div className="audit-toolbar"><div className="filter-chips"><span className="demo-label">Demo</span><button className="active">Todos <b>5</b></button><button>Alta <b>2</b></button><button>Media <b>2</b></button><button>Baja <b>1</b></button></div><button className="outline-button small"><FileSearch size={14} /> Último rastreo: hoy</button></div><Card><DataTable rows={technicalIssues} columns={auditColumns} rowKey={(row) => row.issue} label="issues" demo /></Card></>; }
+function TechnicalAudit() { return <AuditPanel />; }
 
 function Keywords() { return <><div className="keyword-callout"><div className="callout-icon"><Search size={20} /></div><div><strong>Oportunidades detectadas</strong><p>12 keywords demo están a menos de 3 posiciones del Top 10.</p></div><button className="text-button">Ver oportunidades <ArrowRight size={14} /></button></div><Card><CardHeader title="Keywords prioritarias" detail="Términos reales de Whalemate · métricas de demostración" /><DataTable rows={keywords} columns={keywordColumns} rowKey={(row) => row.keyword} label="keywords" demo /></Card></>; }
 
@@ -45,13 +46,6 @@ function Metric({ label, value, change }: { label: string; value: string; change
 function Coverage({ label, value, count, tone }: { label: string; value: string; count: string; tone: string }) { return <div className="coverage"><div><span className={`coverage-dot ${tone}`} /><b>{label}</b><small>{count} URLs</small></div><div className="coverage-bar"><i className={tone} style={{ width: value }} /></div><strong>{value}</strong></div>; }
 function Setting({ icon, title, detail }: { icon: string; title: string; detail: string }) { return <div className="setting"><span>{icon}</span><div><b>{title}</b><small>{detail}</small></div><StatusPill>Próximamente</StatusPill></div>; }
 
-const auditColumns: TableColumn<typeof technicalIssues[number]>[] = [
-  { key: "issue", label: "Issue", sortValue: (row) => row.issue, filter: "text" },
-  { key: "category", label: "Categoría", sortValue: (row) => row.category, filter: "select", options: ["Enlaces", "On-page", "Accesibilidad", "Rendimiento", "Indexación"] },
-  { key: "affected", label: "Afectadas", sortValue: (row) => Number(row.affected.replace(/\D/g, "")), filter: "number" },
-  { key: "severity", label: "Severidad", sortValue: (row) => row.severity, filter: "select", options: ["Alta", "Media", "Baja"], render: (row) => <StatusPill tone={row.severity.toLowerCase()}>{row.severity}</StatusPill> },
-  { key: "status", label: "Estado", sortValue: (row) => row.status, filter: "select", options: ["Abierto", "En progreso", "Resuelto"], render: (row) => <StatusPill tone={row.status === "Resuelto" ? "success" : "neutral"}>{row.status}</StatusPill> },
-];
 const keywordColumns: TableColumn<typeof keywords[number]>[] = [
   { key: "keyword", label: "Keyword", sortValue: (row) => row.keyword, filter: "text" },
   { key: "url", label: "URL", sortValue: (row) => row.url, filter: "text" },
