@@ -57,7 +57,7 @@ export async function fetchAnalyticsView(filters: IntegrationFilters, view: Anal
     Daily: { names: ["date"], label: "date" },
   };
   const dimensions = dimensionByView[view];
-  const metricNames = ["sessions", "activeUsers", "newUsers", "engagementRate", "conversions", "keyEvents", "keyEventsPerSession", "eventCount"];
+  const metricNames = ["sessions", "activeUsers", "newUsers", "engagementRate", "conversions", "keyEvents", "eventsPerSession", "eventCount"];
   const request = (startDate: string, endDate: string, withDimensions: boolean) => client.properties.runReport({ property, requestBody: { dateRanges: [{ startDate, endDate }], dimensions: withDimensions ? dimensions.names.map((name) => ({ name })) : undefined, metrics: metricNames.map((name) => ({ name })), dimensionFilter: { andGroup: { expressions: [organic, ...filtersFor()].map((filter) => ({ filter })) } }, limit: "1000", keepEmptyRows: false } });
   const [current, currentSummary, previous] = await Promise.all([request(period.start, period.end, true), request(period.start, period.end, false), request(period.previousStart, period.previousEnd, false)]);
   const value = (row: { metricValues?: Array<{ value?: string | null }> }, index: number) => {
