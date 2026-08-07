@@ -3,6 +3,7 @@ import "server-only";
 import { acquireSynchronizationLock, releaseSynchronizationLock, saveGa4Daily, saveGa4LandingPages, saveGscPages, saveGscPerformance, saveGscQueries, saveSourceSnapshot, saveSynchronization } from "@/db/queries";
 import { dates, fetchAnalytics, fetchAnalyticsDaily, fetchSearchConsole, fetchSearchConsoleDaily, type IntegrationFilters } from "@/lib/integrations";
 import { SITE_URL } from "@/lib/site";
+import { evaluateAlerts } from "@/lib/alerts";
 
 export type IngestSource = "gsc" | "ga4";
 export type IngestResult = { source: IngestSource; status: "success" | "running" | "error"; generatedAt?: string; error?: string };
@@ -38,6 +39,7 @@ async function ingestSource(source: IngestSource, _force: boolean): Promise<Inge
       await saveSourceSnapshot(SITE_URL, "analytics", "ga4-summary:30:all:all:all", { ...data, generatedAt });
     }
     await saveSynchronization({ source: lockSource, status: "success" });
+    await evaluateAlerts();
     return { source, status: "success", generatedAt };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error de ingesta";

@@ -226,6 +226,27 @@ CREATE TABLE IF NOT EXISTS keyword_history (
   UNIQUE (keyword_target_id, day)
 );
 
+CREATE TABLE IF NOT EXISTS alerts (
+  id BIGSERIAL PRIMARY KEY,
+  site_url TEXT NOT NULL,
+  fingerprint TEXT NOT NULL,
+  source TEXT NOT NULL,
+  rule TEXT NOT NULL,
+  entity TEXT,
+  severity TEXT NOT NULL CHECK (severity IN ('critical', 'high', 'medium', 'low')),
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  metric TEXT,
+  current_value NUMERIC,
+  previous_value NUMERIC,
+  variation NUMERIC,
+  detected_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  related_url TEXT,
+  recommendation TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewed', 'resolved')),
+  UNIQUE (site_url, fingerprint)
+);
+
 CREATE INDEX IF NOT EXISTS synchronization_lock_idx ON synchronization (lock_expires_at);
 CREATE INDEX IF NOT EXISTS gsc_performance_daily_lookup_idx ON gsc_performance_daily (site_url, day);
 CREATE INDEX IF NOT EXISTS gsc_queries_daily_lookup_idx ON gsc_queries_daily (site_url, day);
@@ -240,3 +261,4 @@ CREATE INDEX IF NOT EXISTS sitemaps_latest_idx ON sitemaps (site_url, snapshot_k
 CREATE INDEX IF NOT EXISTS indexation_runs_latest_idx ON indexation_runs (site_url, completed_at DESC);
 CREATE INDEX IF NOT EXISTS source_snapshots_latest_idx ON source_snapshots (site_url, source, completed_at DESC);
 CREATE INDEX IF NOT EXISTS keyword_history_day_idx ON keyword_history (keyword_target_id, day DESC);
+CREATE INDEX IF NOT EXISTS alerts_site_status_idx ON alerts (site_url, status, detected_at DESC);

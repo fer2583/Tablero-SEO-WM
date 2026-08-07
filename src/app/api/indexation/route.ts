@@ -4,6 +4,7 @@ import { databaseConfigured } from "@/lib/snapshot-refresh";
 import { SITE_URL } from "@/lib/site";
 import { loadIndexation } from "@/lib/indexation";
 import { saveIndexationRun } from "@/db/queries";
+import { evaluateAlerts } from "@/lib/alerts";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
     if (force) {
       const snapshot = await loadIndexation(params.get("action") === "inspect-priority");
       await saveIndexationRun(SITE_URL, "manual", snapshot);
+      await evaluateAlerts();
       return NextResponse.json(snapshot, { headers: { "Cache-Control": "no-store, max-age=0" } });
     }
     const latest = await getLatestIndexationSnapshot(SITE_URL);

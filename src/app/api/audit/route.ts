@@ -4,6 +4,7 @@ import { databaseConfigured } from "@/lib/snapshot-refresh";
 import { SITE_URL } from "@/lib/site";
 import { runAudit } from "@/lib/audit";
 import { saveAuditSnapshot } from "@/db/queries";
+import { evaluateAlerts } from "@/lib/alerts";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
     if (force) {
       const snapshot = await runAudit();
       await saveAuditSnapshot({ siteUrl: SITE_URL, snapshotKey: "manual", status: "success", snapshot, issues: snapshot.crawler.issues.map((issue) => ({ key: issue.id, category: issue.category, severity: issue.severity, issue: issue.issue, evidence: issue.evidence, recommendation: issue.recommendation, status: issue.status })) });
+      await evaluateAlerts();
       return NextResponse.json(snapshot, { headers: { "Cache-Control": "no-store, max-age=0" } });
     }
     const latest = await getLatestAuditSnapshot(SITE_URL);
