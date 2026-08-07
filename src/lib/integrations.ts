@@ -10,7 +10,7 @@ export type SearchConsoleData = { period: { start: string; end: string; previous
 export type AnalyticsRow = { name: string; page: string; users: number; activeUsers?: number | null; newUsers?: number | null; sessions: number; conversions: number; keyEventsPerSession?: number | null; engagementRate: number; engagementDuration: number };
 export type AiTrafficStatus = "available" | "unavailable";
 export type AnalyticsData = { period: { start: string; end: string; previousStart: string; previousEnd: string }; metrics: { users: number | null; activeUsers?: number | null; newUsers: number | null; sessions: number | null; organicSessions: number | null; aiSessions: number | null; engagedSessions: number | null; engagementRate: number | null; engagementDuration: number | null; eventCount: number | null; conversions: number | null; keyEventsPerSession?: number | null }; previous: Omit<AnalyticsData["metrics"], "organicSessions"> & { organicSessions: number | null }; landingPages: AnalyticsRow[]; sources: AnalyticsRow[]; aiSources: AnalyticsRow[]; aiLandingPages: AnalyticsRow[]; countries: AnalyticsRow[]; regions?: AnalyticsRow[]; devices: AnalyticsRow[]; dailySessions: number[]; aiStatus: AiTrafficStatus; warnings: string[] };
-export const ANALYTICS_VIEWS = ["Acquisition", "Conversions", "Device", "Demographic", "Geographic", "Page Path", "Monthly", "Weekly", "Daily"] as const;
+export const ANALYTICS_VIEWS = ["Acquisition", "Conversions", "Device", "Geographic", "Page Path", "Monthly", "Weekly", "Daily"] as const;
 export type AnalyticsView = typeof ANALYTICS_VIEWS[number];
 export type AnalyticsViewRow = { name: string; page: string; users: number; sessions: number; activeUsers: number; newUsers: number; engagementRate: number; engagementDuration: number; conversions: number; keyEvents: number; keyEventsPerSession: number; eventCount: number };
 export type AnalyticsViewData = { view: AnalyticsView; dimension: string; period: { start: string; end: string; previousStart: string; previousEnd: string }; metrics: { sessions: number | null; activeUsers: number | null; newUsers: number | null; engagementRate: number | null; conversions: number | null; keyEvents: number | null; keyEventsPerSession: number | null }; previous: AnalyticsViewData["metrics"]; rows: AnalyticsViewRow[]; warnings: string[] };
@@ -53,7 +53,6 @@ export async function fetchAnalyticsView(filters: IntegrationFilters, view: Anal
     Acquisition: { names: ["sessionSourceMedium"], label: "sessionSourceMedium" },
     Conversions: { names: ["eventName"], label: "eventName" },
     Device: { names: ["deviceCategory"], label: "deviceCategory" },
-    Demographic: { names: ["userAgeBracket", "userGender"], label: "userAgeBracket / userGender" },
     Geographic: { names: ["country", "region"], label: "country / region" },
     "Page Path": { names: ["landingPagePlusQueryString"], label: "landingPagePlusQueryString" },
     Monthly: { names: ["month"], label: "month" },
