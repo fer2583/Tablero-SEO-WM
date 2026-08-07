@@ -36,15 +36,19 @@ export async function fetchAnalyticsView(filters: IntegrationFilters, view: Anal
   const property = `properties/${process.env.GA4_PROPERTY_ID}`;
   type MatchType = "EXACT" | "FULL_REGEXP" | "CONTAINS";
   type Filter = { fieldName: string; stringFilter: { matchType: MatchType; value: string } };
+  type FilterExpression = { filter: Filter } | { notExpression: { filter: Filter } };
   const organic: Filter = { fieldName: "sessionDefaultChannelGroup", stringFilter: { matchType: "EXACT", value: "Organic Search" } };
-  const filtersFor = (): Filter[] => [
-    filters.source && { fieldName: "sessionSourceMedium", stringFilter: { matchType: "EXACT", value: filters.source } },
-    filters.country !== "all" && { fieldName: "countryId", stringFilter: { matchType: "EXACT", value: filters.country } },
-    filters.region && { fieldName: "region", stringFilter: { matchType: "EXACT", value: filters.region } },
-    filters.device !== "all" && { fieldName: "deviceCategory", stringFilter: { matchType: "EXACT", value: filters.device } },
-    filters.language !== "all" && { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "FULL_REGEXP", value: filters.language === "en" ? "^/en(?:/|$)" : filters.language === "pt" ? "^/pt(?:/|$)" : "^/(?!en(?:/|$)|pt(?:/|$))" } },
-    filters.page && { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "CONTAINS", value: filters.page } },
-  ].filter(Boolean) as Filter[];
+  const filtersFor = (): FilterExpression[] => [
+    filters.source && { filter: { fieldName: "sessionSourceMedium", stringFilter: { matchType: "EXACT", value: filters.source } } },
+    filters.country !== "all" && { filter: { fieldName: "countryId", stringFilter: { matchType: "EXACT", value: filters.country } } },
+    filters.region && { filter: { fieldName: "region", stringFilter: { matchType: "EXACT", value: filters.region } } },
+    filters.device !== "all" && { filter: { fieldName: "deviceCategory", stringFilter: { matchType: "EXACT", value: filters.device } } },
+    filters.language === "en" && { filter: { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "FULL_REGEXP", value: "^/en(?:/|$)" } } },
+    filters.language === "pt" && { filter: { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "FULL_REGEXP", value: "^/pt(?:/|$)" } } },
+    filters.language === "es" && { notExpression: { filter: { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "CONTAINS", value: "/en" } } } },
+    filters.language === "es" && { notExpression: { filter: { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "CONTAINS", value: "/pt" } } } },
+    filters.page && { filter: { fieldName: "landingPagePlusQueryString", stringFilter: { matchType: "CONTAINS", value: filters.page } } },
+  ].filter(Boolean) as FilterExpression[];
   const dimensionByView: Record<AnalyticsView, { names: string[]; label: string }> = {
     Acquisition: { names: ["sessionSourceMedium"], label: "sessionSourceMedium" },
     Conversions: { names: ["eventName"], label: "eventName" },
@@ -58,7 +62,7 @@ export async function fetchAnalyticsView(filters: IntegrationFilters, view: Anal
   };
   const dimensions = dimensionByView[view];
   const metricNames = ["sessions", "activeUsers", "newUsers", "engagementRate", "keyEvents", "eventsPerSession", "eventCount"];
-  const request = (startDate: string, endDate: string, withDimensions: boolean) => client.properties.runReport({ property, requestBody: { dateRanges: [{ startDate, endDate }], dimensions: withDimensions ? dimensions.names.map((name) => ({ name })) : undefined, metrics: metricNames.map((name) => ({ name })), dimensionFilter: { andGroup: { expressions: [organic, ...filtersFor()].map((filter) => ({ filter })) } }, limit: "1000", keepEmptyRows: false } });
+  const request = (startDate: string, endDate: string, withDimensions: boolean) => client.properties.runReport({ property, requestBody: { dateRanges: [{ startDate, endDate }], dimensions: withDimensions ? dimensions.names.map((name) => ({ name })) : undefined, metrics: metricNames.map((name) => ({ name })), dimensionFilter: { andGroup: { expressions: [{ filter: organic }, ...filtersFor()] } }, limit: "1000", keepEmptyRows: false } });
   const [current, currentSummary, previous] = await Promise.all([request(period.start, period.end, true), request(period.start, period.end, false), request(period.previousStart, period.previousEnd, false)]);
   const value = (row: { metricValues?: Array<{ value?: string | null }> }, index: number) => {
     const parsed = Number(row.metricValues?.[index]?.value);
