@@ -3,6 +3,8 @@
 import { ArrowDown, ArrowUp, ChevronsUpDown, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
+const PAGE_SIZE = 25;
+
 export type TableFilter = "text" | "select" | "number";
 export type TableColumn<T> = {
   key: string;
@@ -19,16 +21,19 @@ export function DataTable<T>({
   columns,
   rowKey = (_, index) => String(index),
   label = "tabla",
+  className = "",
 }: {
   rows: T[];
   columns: TableColumn<T>[];
   rowKey?: (row: T, index: number) => string;
   label?: string;
+  className?: string;
 }) {
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [sort, setSort] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
-  const updateFilter = (key: string, value: string) => { setFilters((current) => ({ ...current, [key]: value })); };
+  const [page, setPage] = useState(1);
+  const updateFilter = (key: string, value: string) => { setPage(1); setFilters((current) => ({ ...current, [key]: value })); };
   const filtered = useMemo(() => rows.filter((row) => {
     const searchable = columns.map((column) => String(column.sortValue?.(row) ?? "")).join(" ").toLowerCase();
     if (search && !searchable.includes(search.toLowerCase())) return false;
@@ -50,11 +55,15 @@ export function DataTable<T>({
     const result = typeof left === "number" && typeof right === "number" ? left - right : String(left).localeCompare(String(right), "es");
     return sort.direction === "asc" ? result : -result;
   }), [columns, filtered, sort]);
-  const toggleSort = (key: string) => setSort((current) => current?.key === key ? { key, direction: current.direction === "asc" ? "desc" : "asc" } : { key, direction: "asc" });
-  return <div className="data-table-wrap">
-     <div className="table-tools"><label className="table-search"><Search size={14} /><span className="sr-only">Buscar en {label}</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Buscar en ${label}`} /></label><span className="table-count">{filtered.length} resultados</span></div>
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const activePage = Math.min(page, pageCount);
+  const visibleRows = sorted.slice((activePage - 1) * PAGE_SIZE, activePage * PAGE_SIZE);
+  const toggleSort = (key: string) => { setPage(1); setSort((current) => current?.key === key ? { key, direction: current.direction === "asc" ? "desc" : "asc" } : { key, direction: "asc" }); };
+  return <div className={`data-table-wrap ${className}`}>
+      <div className="table-tools"><label className="table-search"><Search size={14} /><span className="sr-only">Buscar en {label}</span><input value={search} onChange={(event) => { setPage(1); setSearch(event.target.value); }} placeholder={`Buscar en ${label}`} /></label><span className="table-count">{filtered.length} resultados</span></div>
     <div className="column-filters">{columns.filter((column) => column.filter).map((column) => column.filter === "select" ? <label key={column.key}><span>{column.label}</span><select value={filters[column.key] ?? ""} onChange={(event) => updateFilter(column.key, event.target.value)}><option value="">Todos</option>{column.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select></label> : <label key={column.key}><span>{column.label}</span><input placeholder={column.filter === "number" ? "min:max" : "Filtrar"} value={filters[column.key] ?? ""} onChange={(event) => updateFilter(column.key, event.target.value)} /></label>)}</div>
-      <div className="table-scroll"><table><thead><tr>{columns.map((column) => <th key={column.key} title={column.label}><button className="sort-button" onClick={() => toggleSort(column.key)} aria-label={`Ordenar ${column.label}`}><span>{column.label}</span>{sort?.key === column.key ? sort.direction === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} /> : <ChevronsUpDown size={13} />}</button></th>)}</tr></thead><tbody>{sorted.length ? sorted.map((row, index) => <tr key={rowKey(row, index)}>{columns.map((column, columnIndex) => <td className={column.cellClassName?.(row)} key={column.key}>{column.render ? column.render(row) : <>{columnIndex === 0 ? <b>{String(column.sortValue?.(row) ?? "")}</b> : String(column.sortValue?.(row) ?? "")}</>}</td>)}</tr>) : <tr><td colSpan={columns.length}><div className="table-empty">Sin resultados para los filtros actuales.</div></td></tr>}</tbody></table></div>
+       <div className="table-scroll"><table><thead><tr>{columns.map((column) => <th key={column.key} title={column.label}><button className="sort-button" onClick={() => toggleSort(column.key)} aria-label={`Ordenar ${column.label}`}><span>{column.label}</span>{sort?.key === column.key ? sort.direction === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} /> : <ChevronsUpDown size={13} />}</button></th>)}</tr></thead><tbody>{visibleRows.length ? visibleRows.map((row, index) => <tr key={rowKey(row, (page - 1) * PAGE_SIZE + index)}>{columns.map((column, columnIndex) => <td className={column.cellClassName?.(row)} key={column.key}>{column.render ? column.render(row) : <>{columnIndex === 0 ? <b>{String(column.sortValue?.(row) ?? "")}</b> : String(column.sortValue?.(row) ?? "")}</>}</td>)}</tr>) : <tr><td colSpan={columns.length}><div className="table-empty">Sin resultados para los filtros actuales.</div></td></tr>}</tbody></table></div>
+       <div className="table-pagination" aria-label={`Paginación de ${label}`}><button className="pagination-button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={activePage === 1}>Anterior</button><span aria-live="polite">Página {activePage} de {pageCount}</span><button className="pagination-button" onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={activePage === pageCount}>Siguiente</button></div>
   </div>;
 }
 
