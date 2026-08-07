@@ -52,20 +52,20 @@ export async function fetchAnalyticsView(filters: IntegrationFilters, view: Anal
     Demographic: { names: ["userAgeBracket", "userGender"], label: "userAgeBracket / userGender" },
     Geographic: { names: ["country", "region"], label: "country / region" },
     "Page Path": { names: ["landingPagePlusQueryString"], label: "landingPagePlusQueryString" },
-    Monthly: { names: ["dateMonth"], label: "dateMonth" },
-    Weekly: { names: ["dateWeek"], label: "dateWeek" },
+    Monthly: { names: ["month"], label: "month" },
+    Weekly: { names: ["week"], label: "week" },
     Daily: { names: ["date"], label: "date" },
   };
   const dimensions = dimensionByView[view];
-  const metricNames = ["sessions", "activeUsers", "newUsers", "engagementRate", "conversions", "keyEvents", "eventsPerSession", "eventCount"];
+  const metricNames = ["sessions", "activeUsers", "newUsers", "engagementRate", "keyEvents", "eventsPerSession", "eventCount"];
   const request = (startDate: string, endDate: string, withDimensions: boolean) => client.properties.runReport({ property, requestBody: { dateRanges: [{ startDate, endDate }], dimensions: withDimensions ? dimensions.names.map((name) => ({ name })) : undefined, metrics: metricNames.map((name) => ({ name })), dimensionFilter: { andGroup: { expressions: [organic, ...filtersFor()].map((filter) => ({ filter })) } }, limit: "1000", keepEmptyRows: false } });
   const [current, currentSummary, previous] = await Promise.all([request(period.start, period.end, true), request(period.start, period.end, false), request(period.previousStart, period.previousEnd, false)]);
   const value = (row: { metricValues?: Array<{ value?: string | null }> }, index: number) => {
     const parsed = Number(row.metricValues?.[index]?.value);
     return Number.isFinite(parsed) ? parsed : null;
   };
-  const metrics = (row: { metricValues?: Array<{ value?: string | null }> } | undefined) => ({ sessions: value(row ?? {}, 0), activeUsers: value(row ?? {}, 1), newUsers: value(row ?? {}, 2), engagementRate: value(row ?? {}, 3), conversions: value(row ?? {}, 4), keyEvents: value(row ?? {}, 5), keyEventsPerSession: value(row ?? {}, 6) });
-  const rows = (current.data.rows ?? []).map((row) => ({ name: (row.dimensionValues ?? []).map((item) => item.value ?? "").join(" / ") || "(not set)", page: "", users: value(row, 1) ?? 0, sessions: value(row, 0) ?? 0, activeUsers: value(row, 1) ?? 0, newUsers: value(row, 2) ?? 0, engagementRate: value(row, 3) ?? 0, engagementDuration: 0, conversions: value(row, 4) ?? 0, keyEvents: value(row, 5) ?? 0, keyEventsPerSession: value(row, 6) ?? 0, eventCount: value(row, 7) ?? 0 }));
+  const metrics = (row: { metricValues?: Array<{ value?: string | null }> } | undefined) => ({ sessions: value(row ?? {}, 0), activeUsers: value(row ?? {}, 1), newUsers: value(row ?? {}, 2), engagementRate: value(row ?? {}, 3), conversions: value(row ?? {}, 4), keyEvents: value(row ?? {}, 4), keyEventsPerSession: value(row ?? {}, 5) });
+  const rows = (current.data.rows ?? []).map((row) => ({ name: (row.dimensionValues ?? []).map((item) => item.value ?? "").join(" / ") || "(not set)", page: "", users: value(row, 1) ?? 0, sessions: value(row, 0) ?? 0, activeUsers: value(row, 1) ?? 0, newUsers: value(row, 2) ?? 0, engagementRate: value(row, 3) ?? 0, engagementDuration: 0, conversions: value(row, 4) ?? 0, keyEvents: value(row, 4) ?? 0, keyEventsPerSession: value(row, 5) ?? 0, eventCount: value(row, 6) ?? 0 }));
   return { view, dimension: dimensions.label, period, metrics: metrics(currentSummary.data.rows?.[0]), previous: metrics(previous.data.rows?.[0]), rows, warnings: [] };
 }
 
