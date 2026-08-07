@@ -98,3 +98,28 @@ export async function fetchAnalyticsDaily(): Promise<DailyGa4Data> {
   const day = (value: string) => value.length === 8 ? `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}` : value;
   return { daily: (daily.data.rows ?? []).map((row) => ({ day: day(row.dimensionValues?.[0]?.value ?? ""), channel: row.dimensionValues?.[1]?.value ?? "Organic Search", users: value(row, 0), sessions: value(row, 1), engagedSessions: value(row, 2), conversions: value(row, 3), engagementRate: value(row, 4), engagementDuration: value(row, 5) })), landingPages: (landing.data.rows ?? []).map((row) => ({ day: day(row.dimensionValues?.[0]?.value ?? ""), landingPage: row.dimensionValues?.[1]?.value ?? "", users: value(row, 0), sessions: value(row, 1), conversions: value(row, 2), engagementRate: value(row, 3) })) };
 }
+
+export type SearchConsoleWorkspaceTab = "performance" | "queries" | "geographic" | "device" | "site-url";
+export type SearchConsoleWorkspaceRow = { dimension: string; page?: string; clicks: number; impressions: number; ctr: number; position: number };
+export type SearchConsoleWorkspaceData = { tab: SearchConsoleWorkspaceTab; period: ReturnType<typeof dates>; metrics: { clicks: number; impressions: number; ctr: number; position: number }; previous: { clicks: number; impressions: number; ctr: number; position: number }; rows: SearchConsoleWorkspaceRow[] };
+
+export async function fetchSearchConsoleWorkspace(filters: IntegrationFilters, tab: SearchConsoleWorkspaceTab): Promise<SearchConsoleWorkspaceData> {
+  const period = dates(filters.days);
+  const client = searchConsoleClient();
+  const dimension = tab === "performance" ? ["date"] : tab === "queries" ? ["query", "page"] : tab === "geographic" ? ["country"] : tab === "device" ? ["device"] : ["page"];
+  const dimensionFilters = [
+    filters.country !== "all" && { dimension: "country", operator: "equals", expression: filters.country.toLowerCase() },
+    filters.device !== "all" && { dimension: "device", operator: "equals", expression: filters.device },
+    filters.language !== "all" && { dimension: "page", operator: "includingRegex", expression: filters.language === "en" ? "/en/" : filters.language === "pt" ? "/pt/" : "^(?!.*\\/(en|pt)\\/).*" },
+    filters.page && { dimension: "page", operator: "includingRegex", expression: filters.page },
+    filters.query && { dimension: "query", operator: "includingRegex", expression: filters.query },
+  ].filter(Boolean) as Array<{ dimension: string; operator: string; expression: string }>;
+  const request = (startDate: string, endDate: string, dimensions?: string[]) => client.searchanalytics.query({ siteUrl: searchConsoleSite(), requestBody: { startDate, endDate, dimensions, dimensionFilterGroups: dimensionFilters.length ? [{ groupType: "and", filters: dimensionFilters }] : undefined, rowLimit: dimensions?.length === 2 ? 25000 : 1000 } });
+  const [current, currentSummary, previousSummary] = await Promise.all([request(period.start, period.end, dimension), request(period.start, period.end), request(period.previousStart, period.previousEnd)]);
+  const rows = (current.data.rows ?? []).map((row) => ({ dimension: row.keys?.[0] ?? "", page: tab === "queries" ? row.keys?.[1] ?? "" : undefined, clicks: number(row.clicks), impressions: number(row.impressions), ctr: number(row.ctr), position: number(row.position) }));
+  const aggregate = (response: { data: { rows?: Array<{ clicks?: number | null; impressions?: number | null; ctr?: number | null; position?: number | null }> } }) => {
+    const row = response.data.rows?.[0];
+    return { clicks: number(row?.clicks), impressions: number(row?.impressions), ctr: number(row?.impressions) ? number(row?.clicks) / number(row?.impressions) : 0, position: number(row?.position) };
+  };
+  return { tab, period, metrics: aggregate(currentSummary), previous: aggregate(previousSummary), rows };
+}
