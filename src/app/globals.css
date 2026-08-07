@@ -159,9 +159,11 @@ nav { display:grid;gap:4px; } nav a { display:flex;align-items:center;gap:12px;p
 .content-panel .table-scroll th:first-child, .content-panel .table-scroll td:first-child, .keywords-panel .table-scroll th:first-child, .keywords-panel .table-scroll td:first-child { width:23%; }
 .content-panel .table-scroll th:nth-child(2), .content-panel .table-scroll td:nth-child(2), .keywords-panel .table-scroll th:nth-child(2), .keywords-panel .table-scroll td:nth-child(2) { width:29%; }
 .content-panel .status-pill, .keywords-panel .status-pill { color:var(--brand-primary); background:var(--brand-soft); border-color:#a9c5ee; }
+.content-panel .table-scroll th:first-child .sort-button, .content-panel .table-scroll td.content-query-cell, .content-panel .table-scroll td.content-query-cell * { color:#fff; }
+.content-panel .table-scroll th:first-child .sort-button:hover, .content-panel .table-scroll td.content-query-cell a:hover, .content-panel .table-scroll td.content-query-cell button:hover { color:#fff; }
 .keywords-tabs { display:flex; gap:5px; overflow-x:auto; border-bottom:1px solid var(--line); margin-bottom:14px; }
-.keywords-tabs button { flex:none; border:0; border-bottom:2px solid transparent; padding:9px 11px; color:#486183; background:transparent; font-size:11px; }
-.keywords-tabs button:hover, .keywords-tabs button.active { color:var(--brand-primary); border-bottom-color:var(--brand-primary); }
+.keywords-tabs button { flex:none; border:0; border-bottom:2px solid transparent; padding:9px 11px; color:#fff; background:transparent; font-size:11px; }
+.keywords-tabs button:hover, .keywords-tabs button.active { color:#fff; border-bottom-color:var(--brand-primary); }
 .keyword-heat.heatmap-1 { background:#f0f6ff; }.keyword-heat.heatmap-2 { background:#dceaff; }.keyword-heat.heatmap-3 { background:#c4dcff; }.keyword-heat.heatmap-4 { background:#9ec5ff; color:var(--brand-deep)!important; }.keyword-heat.heatmap-5 { background:#73aaff; color:var(--brand-deep)!important; }
 @media (max-width:720px) { .table-pagination { justify-content:space-between; }.content-panel .table-scroll th, .content-panel .table-scroll td, .keywords-panel .table-scroll th, .keywords-panel .table-scroll td { padding:8px 5px; font-size:10px; }.content-panel .table-scroll th:first-child, .content-panel .table-scroll td:first-child, .keywords-panel .table-scroll th:first-child, .keywords-panel .table-scroll td:first-child { width:27%; }.content-panel .table-scroll th:nth-child(2), .content-panel .table-scroll td:nth-child(2), .keywords-panel .table-scroll th:nth-child(2), .keywords-panel .table-scroll td:nth-child(2) { width:27%; } }
 

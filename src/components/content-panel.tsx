@@ -19,7 +19,7 @@ export function ContentPanel() {
   if (loading) return <LoadingState />;
   if (!response?.data) return <Card><EmptyState title={response?.status === "error" ? "Error" : "No disponible"} detail={response?.error ?? "Search Console no devolvió datos."} /></Card>;
   const data = response.data; const queryColumns: TableColumn<ContentQuery>[] = [
-    { key: "query", label: "Consulta", sortValue: (row) => row.query, filter: "text" },
+    { key: "query", label: "Consulta", sortValue: (row) => row.query, filter: "text", cellClassName: () => "content-query-cell" },
     { key: "page", label: "Página asociada", sortValue: (row) => row.page, render: (row) => row.page ? <span title={row.page}>{row.page}</span> : "No data", filter: "text" },
     { key: "clicks", label: "Clics", sortValue: (row) => row.clicks, render: (row) => number(row.clicks) },
     { key: "impressions", label: "Impresiones", sortValue: (row) => row.impressions, render: (row) => number(row.impressions) },
