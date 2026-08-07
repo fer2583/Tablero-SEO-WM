@@ -1,5 +1,18 @@
 # Métricas y filtros
 
+## Matriz de secciones
+
+| Sección | Fuente | Dimensiones | Filtros |
+| --- | --- | --- | --- |
+| Resumen | `/api/summary`, snapshots DB | métricas agregadas de GSC/GA4, auditoría, indexación | ninguno contra APIs; sólo snapshot persistido |
+| Search | GSC Search Analytics, `/api/integrations/search-console` | fecha, página, país, dispositivo, search type, apariencia y métricas globales | periodo, idioma, país, dispositivo, página |
+| Keywords | GSC Search Analytics, `/api/gsc/keywords` | query + página, keyword objetivo, intención, cluster, estado, marca/no marca | periodo, país, dispositivo, página, query |
+| Analytics | GA4 Data API, `/api/integrations/analytics` | landing page, métricas, source/medium, país, dispositivo | Organic Search, periodo, idioma, país, dispositivo, página |
+| Auditoría | snapshots DB de PageSpeed, CrUX y crawler, `/api/audit` | URLs, issues, CWV, scores y schema | snapshot; no se ejecuta en render |
+| Indexación | snapshots DB de URL Inspection, Sitemaps y crawler, `/api/indexation` | URL, veredicto, cobertura, canonical, sitemap | snapshot; separado de GSC Search Analytics |
+
+La posición de Keywords se etiqueta como **media GSC** y no representa un ranking exacto. La canibalización se marca cuando una query devuelve múltiples páginas. Las oportunidades requieren posición media 4–15, más de 100 impresiones y CTR menor a 3%.
+
 ## Fuentes
 
 - **Search Console (GSC):** clicks orgánicos desde resultados de Google, impresiones, CTR, posición media, queries y organic paths. Las oportunidades se agrupan por posición 4–10 y 11–20.
@@ -8,9 +21,9 @@
 
 ## Filtros
 
-Los filtros globales de periodo, idioma, país y dispositivo se envían a las APIs live. Página y query se aplican a las dimensiones correspondientes. En cada tabla, la búsqueda global, los filtros por columna y las cabeceras de ordenación operan sobre las filas recibidas; `min:max` permite rangos numéricos. Las tablas muestran paginación cuando superan su límite.
+Los filtros globales de periodo, idioma, país y dispositivo se envían a las APIs live de Search, Keywords y Analytics. Página y query se aplican a las dimensiones correspondientes. En cada tabla, la búsqueda global, los filtros por columna y las cabeceras de ordenación operan sobre las filas recibidas; `min:max` permite rangos numéricos. Las tablas muestran paginación cuando superan su límite.
 
-Las vistas sin backend (Indexación avanzada, Keywords, Contenido y Alertas) muestran **No data available** y explican qué conexión falta.
+Si no existe DB o snapshot, Resumen devuelve `no_data`/`unavailable`; no consulta APIs externas. Keywords devuelve `no_data` cuando GSC responde sin filas y `unavailable` ante falta de conexión.
 
 ## Tráfico IA
 

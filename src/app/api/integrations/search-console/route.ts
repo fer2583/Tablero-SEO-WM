@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchSearchConsole, parseFilters, type IntegrationResponse, type SearchConsoleData } from "@/lib/integrations";
+import { fetchSearchGlobal } from "@/lib/search-global";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,8 @@ export async function GET(request: Request) {
     if (!process.env.GSC_SITE_URL || (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS)) throw new Error("Search Console no está conectada. Configura GSC_SITE_URL y credenciales de Google.");
     const generatedAt = new Date().toISOString();
     const data = await fetchSearchConsole(filters);
+    const params = new URL(request.url).searchParams;
+    if (params.get("view") === "global") data.dimensions = await fetchSearchGlobal(filters, params.get("segment") ?? undefined);
     const rows = data.queries.length + data.pages.length;
     const response: IntegrationResponse<SearchConsoleData> = { status: rows ? "live" : "no_data", data, generatedAt, metadata: { rows, lastResponseAt: generatedAt, filters } };
     return NextResponse.json(response, { headers: { "Cache-Control": "no-store, max-age=0" } });

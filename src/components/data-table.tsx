@@ -16,13 +16,13 @@ export type TableColumn<T> = {
 export function DataTable<T>({
   rows,
   columns,
-  rowKey,
+  rowKey = (_, index) => String(index),
   label = "tabla",
   pageSize = 8,
 }: {
   rows: T[];
   columns: TableColumn<T>[];
-  rowKey: (row: T, index: number) => string;
+  rowKey?: (row: T, index: number) => string;
   label?: string;
   pageSize?: number;
 }) {

@@ -20,11 +20,16 @@ Edita `.env.local` y cambia `GOOGLE_APPLICATION_CREDENTIALS` por la ruta absolut
 
 ```env
 GOOGLE_APPLICATION_CREDENTIALS=C:/ruta/al/service-account.json
+DATABASE_URL=postgres://usuario:password@host/base?sslmode=require
 GA4_PROPERTY_ID=528336901
 GSC_SITE_URL=https://www.whalemate.com/
 ```
 
 La cuenta de servicio necesita acceso de solo lectura a la propiedad GA4 `528336901` y al sitio de Search Console configurado en `GSC_SITE_URL`.
+
+## Inicializar Neon/Vercel Postgres
+
+Configura `DATABASE_URL` con la cadena privada de conexión de Neon. En Vercel también puede quedar disponible como `POSTGRES_URL` desde la integración. Ejecuta `src/db/schema.sql` completo en el SQL Editor de Neon, en Vercel Postgres o con `psql "$DATABASE_URL" -f src/db/schema.sql`. El script solo usa `CREATE TABLE/INDEX IF NOT EXISTS` y claves únicas con upsert, por lo que puede repetirse. No se ejecuta durante `next build`.
 
 ## Instalar y ejecutar
 
