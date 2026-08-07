@@ -2,13 +2,13 @@
 
 import { DashboardShell } from "@/components/dashboard-shell";
 import { FilterBar, SectionHeading } from "@/components/ui";
-import { SummaryLive } from "@/components/integration-panels";
+import { SummaryPanel } from "@/components/summary-panel";
 
 export default function Home() {
   return (
     <DashboardShell>
       <SummaryHeading />
-        <SummaryLive />
+        <SummaryPanel />
       <FilterBar />
     </DashboardShell>
   );

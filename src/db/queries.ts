@@ -140,7 +140,7 @@ export async function getLatestSourceSnapshotByPrefix(siteUrl: string, sourcePre
   return result.rows[0] ?? null;
 }
 
-export type MetricRow = { day: string; value: number; siteUrl: string; country?: string; device?: string; language?: string; query?: string; pageUrl?: string; channel?: string; landingPage?: string; clicks?: number; impressions?: number; ctr?: number; position?: number; users?: number; sessions?: number; conversions?: number; engagedSessions?: number; engagementRate?: number; engagementDuration?: number };
+export type MetricRow = { day: string; value?: number; siteUrl: string; country?: string; device?: string; language?: string; query?: string; pageUrl?: string; channel?: string; landingPage?: string; clicks?: number; impressions?: number; ctr?: number; position?: number; users?: number; sessions?: number; conversions?: number; engagedSessions?: number; engagementRate?: number; engagementDuration?: number };
 
 export async function saveGscPerformance(rows: MetricRow[]) {
   for (const row of rows) await getDb().query(`INSERT INTO gsc_performance_daily (site_url, day, country, device, language, clicks, impressions, ctr, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (site_url, day, country, device, language) DO UPDATE SET clicks = EXCLUDED.clicks, impressions = EXCLUDED.impressions, ctr = EXCLUDED.ctr, position = EXCLUDED.position, fetched_at = NOW()`, [row.siteUrl, row.day, row.country ?? "all", row.device ?? "all", row.language ?? "all", row.clicks ?? row.value, row.impressions ?? 0, row.ctr ?? 0, row.position ?? 0]);

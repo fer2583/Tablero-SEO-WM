@@ -21,7 +21,7 @@ La auditoría técnica está fijada a `https://www.whalemate.com/`. Configura `S
 
 ## Fase 2: snapshots y refresco
 
-`/api/summary` lee únicamente snapshots de Search Console y GA4. `/api/audit` y `/api/indexation` leen su último snapshot persistido. Un snapshot de más de 24 horas inicia un refresco oportunista protegido por `synchronization`; si ya existe, la respuesta devuelve el snapshot mientras la ejecución continúa. `?refresh=1` fuerza una ejecución, y `action=inspect-priority` fuerza la inspección limitada de Indexación. No hay crons.
+`/api/summary` lee snapshots persistidos de Search Console y GA4. Si falta un snapshot o tiene más de 24 horas, inicia una ingesta oportunista protegida por `synchronization` y devuelve el último dato disponible mientras continúa; los estados de GSC y GA4 son independientes. La acción manual del Resumen llama a `POST /api/ingest?sources=gsc,ga4&refresh=1`; `GET /api/ingest` nunca consulta APIs externas. No hay crons.
 
 La Fase 2 requiere aplicar nuevamente `src/db/schema.sql` en la base destino para crear `indexation_runs` y `source_snapshots`. Sin variables de base de datos, Auditoría e Indexación conservan su fallback live previo; Resumen informa `unavailable` porque no puede leer datos persistidos.
 
