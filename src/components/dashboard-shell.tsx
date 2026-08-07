@@ -4,11 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { BarChart3, Bell, ChevronDown, FileText, LayoutDashboard, Menu, ScanSearch, Search, Settings2, ShieldCheck, Target, X } from "lucide-react";
+import { BarChart3, Bell, ChevronDown, FileText, LayoutDashboard, Menu, Search, Settings2, ShieldCheck, Target, X } from "lucide-react";
 import type { IntegrationFilters } from "@/lib/integrations";
 import { FilterContext, type FilterContextValue } from "./filter-context";
 
-const navItems = [{ href: "/", label: "Resumen", icon: LayoutDashboard }, { href: "/search-console", label: "Search Console", icon: Search }, { href: "/analytics", label: "Analytics", icon: BarChart3 }, { href: "/indexacion", label: "Indexación", icon: ScanSearch }, { href: "/auditoria-tecnica", label: "Auditoría técnica", icon: ShieldCheck }, { href: "/keywords", label: "Keywords", icon: Target }, { href: "/contenido", label: "Contenido", icon: FileText }, { href: "/alertas", label: "Alertas", icon: Bell }, { href: "/configuracion", label: "Configuración", icon: Settings2 }] as const;
+const navItems = [{ href: "/", label: "Resumen", icon: LayoutDashboard }, { href: "/search-console", label: "Search Console", icon: Search }, { href: "/analytics", label: "Analytics", icon: BarChart3 }, { href: "/auditoria-tecnica", label: "Auditoría técnica", icon: ShieldCheck }, { href: "/keywords", label: "Keywords", icon: Target }, { href: "/contenido", label: "Contenido", icon: FileText }, { href: "/alertas", label: "Alertas", icon: Bell }, { href: "/configuracion", label: "Configuración", icon: Settings2 }] as const;
 
 export function DashboardShell({ children }: { children: React.ReactNode }) { return <Suspense fallback={<div className="state-box">Cargando dashboard...</div>}><DashboardContent>{children}</DashboardContent></Suspense>; }
 
