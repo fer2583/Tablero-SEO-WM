@@ -37,6 +37,7 @@ export async function GET(request: Request) {
   const withPosition = rankings.filter((row) => row.position != null && Number.isFinite(row.position));
   const positionCount = (max: number) => withPosition.filter((row) => (row.position as number) <= max).length;
   const vitals = auditVitals.filter((row) => row.kind === "crux").find((row) => row.device === "mobile") ?? auditVitals.find((row) => row.kind === "crux");
+  const normalizedVitals = vitals ? { status: vitals.status, metrics: Object.fromEntries(Object.entries((vitals.metrics ?? {}) as Record<string, unknown>).map(([key, value]) => [key, value == null ? null : Number(value)])) } : null;
   const data = {
     period: search?.period ?? analytics?.period ?? period,
     metrics: { searchConsole: search?.metrics ?? null, analytics: analytics?.metrics ?? null },
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
     keywords: { winning: [...queryRows].sort((a, b) => b.clicks - a.clicks).slice(0, 5), losing: [...queryRows].sort((a, b) => a.clicks - b.clicks).slice(0, 5), status: search ? "available" : "unavailable" },
     overview: { healthScore: auditScore, keywordsTop10: positionCount(10), monthlyActions: null, issues: auditIssueTotal },
     rankings: { top3: positionCount(3), top10: positionCount(10), top30: positionCount(30), noPosition: rankings.filter((row) => row.position == null).length, rows: rankings.slice(0, 10) },
-    audit: { score: auditScore, issues: auditIssueTotal, severity: auditIssues, lastAudit: audit?.completedAt ?? null, vitals: vitals ? { status: vitals.status, metrics: vitals.metrics } : null },
+    audit: { score: auditScore, issues: auditIssueTotal, severity: auditIssues, lastAudit: audit?.completedAt ?? null, vitals: normalizedVitals },
     indexation: inspection ? { ...inspection, problemUrls: inspection.rows?.filter((row) => row.status !== "indexed").map((row) => row.url).filter(Boolean) ?? [] } : null,
     technical: audit ? { status: audit.status } : null,
     sources: { searchConsole: gsc.state, analytics: ga4.state, audit: audit ? "available" : "unavailable", indexation: indexation ? "available" : "unavailable" },
