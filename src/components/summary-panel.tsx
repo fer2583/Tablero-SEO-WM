@@ -15,7 +15,7 @@ export function SummaryPanel() {
   const [summary, setSummary] = useState<{ status: string; data: Summary; error?: string; metadata?: { snapshotAt?: Record<string, string | null>; states?: Record<string, string> } } | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  useEffect(() => { const controller = new AbortController(); fetch("/api/summary?days=30", { cache: "no-store", signal: controller.signal }).then((response) => response.json()).then((value) => setSummary(value)).catch((error) => { if (error.name !== "AbortError") setSummary({ status: "unavailable", data: empty, error: "No se pudo consultar el Resumen." }); }).finally(() => setLoading(false)); return () => controller.abort(); }, [refreshKey]);
+  useEffect(() => { const controller = new AbortController(); fetch("/api/summary", { cache: "no-store", signal: controller.signal }).then((response) => response.json()).then((value) => setSummary(value)).catch((error) => { if (error.name !== "AbortError") setSummary({ status: "unavailable", data: empty, error: "No se pudo consultar el Resumen." }); }).finally(() => setLoading(false)); return () => controller.abort(); }, [refreshKey]);
   const update = async () => { if (refreshing) return; setRefreshing(true); try { await fetch("/api/ingest?sources=gsc,ga4&refresh=1", { method: "POST" }); refresh(); } finally { setRefreshing(false); } };
   if (loading && !summary) return <LoadingState />;
   const payload = summary ?? { status: "unavailable", data: empty };
