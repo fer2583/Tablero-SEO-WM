@@ -1,16 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { runAudit, type AuditDevice } from "@/lib/audit";
+import { NextResponse } from "next/server";
+import { runAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const url = request.nextUrl.searchParams.get("url") || process.env.SITE_URL || "";
-    const device = request.nextUrl.searchParams.get("device") === "desktop" ? "desktop" : "mobile" as AuditDevice;
-    return NextResponse.json(await runAudit(url, device));
+    return NextResponse.json(await runAudit(), { headers: { "Cache-Control": "no-store, max-age=0" } });
   } catch (error) {
     const message = error instanceof Error ? error.message : "No se pudo ejecutar la auditoría.";
-    const unavailable = /configura SITE_URL|fuente no disponible|timeout|network|fetch failed/i.test(message);
-    return NextResponse.json({ error: /key|token|secret|credential|private/i.test(message) ? "La fuente no está disponible. Revisa la configuración del servidor." : message }, { status: unavailable ? 503 : 400 });
+    return NextResponse.json({ error: /key|token|secret|credential|private/i.test(message) ? "La fuente no está disponible. Revisa la configuración del servidor." : message }, { status: 503 });
   }
 }
