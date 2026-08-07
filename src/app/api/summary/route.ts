@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   const auditPages = auditSnapshot?.crawler?.audited?.length ?? 0;
   const auditIssueTotal = auditIssues.reduce((total, item) => total + item.count, 0);
   const auditScore = auditPages ? Math.max(0, Math.round(100 - auditIssueTotal / auditPages * 10)) : null;
-  const rankings = rankingRows.length ? rankingRows : queryRows.map((row) => ({ query: row.query, position: row.position ?? null, previousPosition: null, impressions: row.impressions ?? null }));
+  const rankings = (rankingRows.length ? rankingRows : queryRows.map((row) => ({ query: row.query, position: row.position ?? null, previousPosition: null, impressions: row.impressions ?? null }))).map((row) => ({ query: row.query, position: row.position == null ? null : Number(row.position), previousPosition: row.previousPosition == null ? null : Number(row.previousPosition), impressions: row.impressions == null ? null : Number(row.impressions) }));
   const withPosition = rankings.filter((row) => row.position != null && Number.isFinite(row.position));
   const positionCount = (max: number) => withPosition.filter((row) => (row.position as number) <= max).length;
   const vitals = auditVitals.filter((row) => row.kind === "crux").find((row) => row.device === "mobile") ?? auditVitals.find((row) => row.kind === "crux");
