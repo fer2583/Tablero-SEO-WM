@@ -11,7 +11,7 @@ La sección Auditoría separa tres fuentes y no usa Search Console para PageSpee
 Configura estas variables en el servidor (Vercel, hosting o `.env.local`). No se incluyen valores en el repositorio ni se envían al navegador:
 
 ```env
-SITE_URL=https://www.whalemate.com/
+SITE_URL=https://tu-hostname-configurado.example/
 PAGESPEED_API_KEY=
 CRUX_API_KEY=
 ```

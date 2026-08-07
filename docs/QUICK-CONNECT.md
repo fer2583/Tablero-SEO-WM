@@ -1,12 +1,12 @@
 # Conectar Google Search Console y GA4
 
-La integración es de solo lectura y está pensada para una demo single-site. Usa una service account en el servidor; las credenciales nunca llegan al navegador. Más adelante se debe migrar a OAuth para soportar múltiples usuarios y propiedades.
+La integración es de solo lectura y está pensada para un único sitio. Usa una service account en el servidor; las credenciales nunca llegan al navegador.
 
 ## 1. Crear la service account
 
 1. Entra en [Google Cloud Console](https://console.cloud.google.com/) y crea o selecciona un proyecto.
 2. En **IAM y administración > Cuentas de servicio**, crea una cuenta de servicio.
-3. Copia su email, por ejemplo `seo-demo@mi-proyecto.iam.gserviceaccount.com`.
+3. Copia su email, por ejemplo `seo-readonly@mi-proyecto.iam.gserviceaccount.com`.
 4. En **Claves > Agregar clave > Crear clave nueva**, selecciona JSON y descarga la clave fuera del repositorio.
 
 No uses archivos de credenciales del proyecto HitOcean ni subas el JSON a Git.
@@ -42,6 +42,6 @@ npm install
 npm run dev
 ```
 
-Comprueba `http://localhost:3000/api/integrations/search-console` y `http://localhost:3000/api/integrations/analytics`. La respuesta incluye `status: "live"` o `status: "fallback"`. En la interfaz, Resumen, Search Console y Analytics muestran el estado correspondiente. Sin variables, sin permisos o ante un error de Google, se mantienen los datos mock y se muestra el error accionable.
+Comprueba `http://localhost:3000/api/integrations/search-console` y `http://localhost:3000/api/integrations/analytics`. La respuesta incluye `status: "live"`, `"no_data"` o `"unavailable"`. En la interfaz se muestra el estado correspondiente; sin variables, sin permisos o ante un error de Google, el payload queda vacío.
 
 Las ventanas son los últimos 28 días completos y los 28 días inmediatamente anteriores. Los endpoints son `GET` y no aceptan credenciales desde el cliente.

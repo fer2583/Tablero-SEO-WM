@@ -1,7 +1,7 @@
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 
-export type AuditStatus = "live" | "unavailable" | "demo";
+export type AuditStatus = "live" | "unavailable";
 export type AuditDevice = "mobile" | "desktop";
 export type AuditIssue = { id: string; category: string; issue: string; severity: "Alta" | "Media" | "Baja"; evidence: string; recommendation: string; status: "open" | "unavailable" };
 export type AuditData = {
@@ -15,11 +15,10 @@ export type AuditData = {
   sitemapUrls: string[];
 };
 
-const defaultSite = "https://www.whalemate.com/";
 const maxBody = 2_000_000;
 const timeoutMs = 8_000;
 
-function siteUrl() { return process.env.SITE_URL || defaultSite; }
+function siteUrl() { if (!process.env.SITE_URL) throw new Error("Auditoría no disponible. Configura SITE_URL."); return process.env.SITE_URL; }
 function host() { return new URL(siteUrl()).hostname.toLowerCase(); }
 function asUrl(value: string) {
   const parsed = new URL(value);

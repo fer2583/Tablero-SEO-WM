@@ -4,12 +4,8 @@ import { ArrowDownRight, ArrowUpRight, Info, LoaderCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { useDashboardFilters } from "./filter-context";
 
-export function DemoBadge() {
-  return <span className="demo-badge"><span className="demo-dot" /> Demo fallback</span>;
-}
-
 export function DataSourceBadge({ live, error }: { live: boolean; error?: string }) {
-  return <span className={`demo-badge ${live ? "data-live" : ""}`} title={error}><span className="demo-dot" /> {live ? "Live" : "Demo fallback"}</span>;
+  return <span className={`data-badge ${live ? "data-live" : ""}`} title={error}><span className="data-dot" /> {live ? "Live" : error ? "Error de conexión" : "Unavailable"}</span>;
 }
 
 export function SectionHeading({ eyebrow, title, description, action }: { eyebrow?: string; title: string; description?: string; action?: ReactNode }) {

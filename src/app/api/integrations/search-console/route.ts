@@ -1,21 +1,23 @@
 import { NextResponse } from "next/server";
-import { fallbackSearchConsole, fetchSearchConsole, parseFilters, type IntegrationResponse } from "@/lib/integrations";
+import { fetchSearchConsole, parseFilters, type IntegrationResponse, type SearchConsoleData } from "@/lib/integrations";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   let filters;
   try { filters = parseFilters(new URL(request.url).searchParams); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Parámetros inválidos." }, { status: 400 }); }
-  const fallback = fallbackSearchConsole(filters.days);
   try {
-    if (!process.env.GSC_SITE_URL || (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS)) throw new Error("Configura GSC_SITE_URL y GOOGLE_SERVICE_ACCOUNT_JSON para activar Search Console.");
+    if (!process.env.GSC_SITE_URL || (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS)) throw new Error("Search Console no está conectada. Configura GSC_SITE_URL y credenciales de Google.");
     const generatedAt = new Date().toISOString();
     const data = await fetchSearchConsole(filters);
-    const response: IntegrationResponse<typeof fallback> = { status: "live", data, generatedAt, metadata: { rows: data.queries.length + data.pages.length, lastResponseAt: generatedAt, filters } };
+    const rows = data.queries.length + data.pages.length;
+    const response: IntegrationResponse<SearchConsoleData> = { status: rows ? "live" : "no_data", data, generatedAt, metadata: { rows, lastResponseAt: generatedAt, filters } };
     return NextResponse.json(response, { headers: { "Cache-Control": "no-store, max-age=0" } });
-  } catch (error) {
+  } catch {
     const generatedAt = new Date().toISOString();
-    const response: IntegrationResponse<typeof fallback> = { status: "fallback", data: fallback, error: error instanceof Error ? error.message : "No se pudo consultar Search Console.", generatedAt, metadata: { rows: fallback.queries.length + fallback.pages.length, lastResponseAt: generatedAt, filters } };
-    return NextResponse.json(response, { headers: { "Cache-Control": "no-store, max-age=0" } });
+    const period = { start: "", end: "", previousStart: "", previousEnd: "" };
+    const data: SearchConsoleData = { period, metrics: { clicks: null, impressions: null, ctr: null, position: 0 }, previous: { clicks: null, impressions: null, ctr: null, position: 0 }, queries: [], pages: [], opportunities: { positions4to10: [], positions11to20: [] } };
+    const response: IntegrationResponse<SearchConsoleData> = { status: "unavailable", data, error: "Search Console no está disponible. Revisa la conexión del servidor.", generatedAt, metadata: { rows: 0, lastResponseAt: generatedAt, filters } };
+    return NextResponse.json(response, { status: 503, headers: { "Cache-Control": "no-store, max-age=0" } });
   }
 }
