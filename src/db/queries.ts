@@ -149,6 +149,51 @@ export async function getLatestSourceSnapshotByPrefix(siteUrl: string, sourcePre
   return result.rows[0] ?? null;
 }
 
+export type SummaryRankingRow = { query: string; position: number | null; previousPosition: number | null; impressions: number | null };
+
+export async function getSummaryRankingRows(siteUrl: string, currentStart: string, currentEnd: string, previousStart: string, previousEnd: string) {
+  const result = await getDb().query<SummaryRankingRow>(
+    `WITH current_rows AS (
+       SELECT query, SUM(impressions)::float AS impressions,
+              CASE WHEN SUM(impressions) > 0 THEN SUM(position * impressions) / SUM(impressions) END AS position
+       FROM gsc_queries_daily WHERE site_url = $1 AND day BETWEEN $2 AND $3 GROUP BY query
+     ), previous_rows AS (
+       SELECT query, CASE WHEN SUM(impressions) > 0 THEN SUM(position * impressions) / SUM(impressions) END AS "previousPosition"
+       FROM gsc_queries_daily WHERE site_url = $1 AND day BETWEEN $4 AND $5 GROUP BY query
+     )
+     SELECT current_rows.query, current_rows.position, previous_rows."previousPosition", current_rows.impressions
+     FROM current_rows LEFT JOIN previous_rows USING (query)
+     ORDER BY current_rows.impressions DESC NULLS LAST LIMIT 100`,
+    [siteUrl, currentStart, currentEnd, previousStart, previousEnd],
+  );
+  return result.rows;
+}
+
+export type SummaryIssueCounts = { severity: string; count: number };
+
+export async function getLatestAuditIssueCounts(siteUrl: string) {
+  const result = await getDb().query<SummaryIssueCounts>(
+    `SELECT ai.severity, COUNT(*)::int AS count
+     FROM audit_issues ai JOIN audit_runs ar ON ar.id = ai.audit_run_id
+     WHERE ar.site_url = $1 AND ar.id = (SELECT id FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 1)
+     GROUP BY ai.severity`,
+    [siteUrl],
+  );
+  return result.rows;
+}
+
+export async function getLatestAuditVitals(siteUrl: string) {
+  const result = await getDb().query<{ device: string; kind: string; status: string; scores: unknown; metrics: unknown }>(
+    `SELECT device, 'pagespeed' AS kind, status, scores, metrics FROM pagespeed_results
+     WHERE site_url = $1 AND audit_run_id = (SELECT id FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 1)
+     UNION ALL
+     SELECT form_factor AS device, 'crux' AS kind, status, '{}'::jsonb AS scores, metrics FROM crux_results
+     WHERE site_url = $1 AND audit_run_id = (SELECT id FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 1)`,
+    [siteUrl],
+  );
+  return result.rows;
+}
+
 export type MetricRow = { day: string; value?: number; siteUrl: string; country?: string; device?: string; language?: string; query?: string; pageUrl?: string; channel?: string; landingPage?: string; clicks?: number; impressions?: number; ctr?: number; position?: number; users?: number; sessions?: number; conversions?: number; engagedSessions?: number; engagementRate?: number; engagementDuration?: number };
 
 export async function saveGscPerformance(rows: MetricRow[]) {

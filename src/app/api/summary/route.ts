@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getLatestAuditSnapshot, getLatestIndexationSnapshot, getLatestSourceSnapshot, getSynchronization } from "@/db/queries";
+import { getLatestAuditIssueCounts, getLatestAuditSnapshot, getLatestAuditVitals, getLatestIndexationSnapshot, getLatestSourceSnapshot, getSummaryRankingRows, getSynchronization } from "@/db/queries";
 import { dates, parseFilters, type AnalyticsData, type SearchConsoleData } from "@/lib/integrations";
 import { databaseConfigured, snapshotState } from "@/lib/snapshot-refresh";
 import { startOpportunisticIngest } from "@/lib/ingest";
@@ -17,21 +17,36 @@ export async function GET(request: Request) {
   const period = dates(summaryFilters.days);
   const gsc = await snapshot<SearchConsoleData>("search-console", period);
   const ga4 = await snapshot<AnalyticsData>("analytics", period);
-  const audit = await getLatestAuditSnapshot(SITE_URL);
+  const [audit, auditIssues, auditVitals, rankingRows] = await Promise.all([
+    getLatestAuditSnapshot(SITE_URL),
+    getLatestAuditIssueCounts(SITE_URL),
+    getLatestAuditVitals(SITE_URL),
+    getSummaryRankingRows(SITE_URL, period.start, period.end, period.previousStart, period.previousEnd),
+  ]);
   const indexation = await getLatestIndexationSnapshot(SITE_URL);
   const search = gsc.value;
   const analytics = ga4.value;
   const unavailable = !search && !analytics;
   const queryRows = search?.queries ?? [];
   const inspection = indexation?.snapshot && typeof indexation.snapshot === "object" ? ((indexation.snapshot as { inspection?: { rows?: Array<{ url?: string; status?: string; error?: string }> } }).inspection ?? null) : null;
-  const technical = audit?.snapshot && typeof audit.snapshot === "object" ? ((audit.snapshot as { crawler?: { issues?: unknown[]; robots?: string; sitemap?: string }; schema?: { status?: string } }).crawler ?? null) : null;
+  const auditSnapshot = audit?.snapshot && typeof audit.snapshot === "object" ? audit.snapshot as { crawler?: { audited?: unknown[]; issues?: unknown[] }; devices?: Record<string, { psi?: { scores?: Record<string, number | null>; metrics?: Record<string, number | null>; status?: string }; crux?: { metrics?: Record<string, number | null>; status?: string } }> } : null;
+  const auditPages = auditSnapshot?.crawler?.audited?.length ?? 0;
+  const auditIssueTotal = auditIssues.reduce((total, item) => total + item.count, 0);
+  const auditScore = auditPages ? Math.max(0, Math.round(100 - auditIssueTotal / auditPages * 10)) : null;
+  const rankings = rankingRows.length ? rankingRows : queryRows.map((row) => ({ query: row.query, position: row.position ?? null, previousPosition: null, impressions: row.impressions ?? null }));
+  const withPosition = rankings.filter((row) => row.position != null && Number.isFinite(row.position));
+  const positionCount = (max: number) => withPosition.filter((row) => (row.position as number) <= max).length;
+  const vitals = auditVitals.filter((row) => row.kind === "crux").find((row) => row.device === "mobile") ?? auditVitals.find((row) => row.kind === "crux");
   const data = {
     period: search?.period ?? analytics?.period ?? period,
     metrics: { searchConsole: search?.metrics ?? null, analytics: analytics?.metrics ?? null },
     previous: { searchConsole: search?.previous ?? null, analytics: analytics?.previous ?? null },
     keywords: { winning: [...queryRows].sort((a, b) => b.clicks - a.clicks).slice(0, 5), losing: [...queryRows].sort((a, b) => a.clicks - b.clicks).slice(0, 5), status: search ? "available" : "unavailable" },
+    overview: { healthScore: auditScore, keywordsTop10: positionCount(10), monthlyActions: null, issues: auditIssueTotal },
+    rankings: { top3: positionCount(3), top10: positionCount(10), top30: positionCount(30), noPosition: rankings.filter((row) => row.position == null).length, rows: rankings.slice(0, 10) },
+    audit: { score: auditScore, issues: auditIssueTotal, severity: auditIssues, lastAudit: audit?.completedAt ?? null, vitals: vitals ? { status: vitals.status, metrics: vitals.metrics } : null },
     indexation: inspection ? { ...inspection, problemUrls: inspection.rows?.filter((row) => row.status !== "indexed").map((row) => row.url).filter(Boolean) ?? [] } : null,
-    technical: technical ? { ...technical, status: technical.issues ? "available" : "no_data" } : null,
+    technical: audit ? { status: audit.status } : null,
     sources: { searchConsole: gsc.state, analytics: ga4.state, audit: audit ? "available" : "unavailable", indexation: indexation ? "available" : "unavailable" },
     periodLabel: "Últimos 30 días vs. 30 días anteriores",
   };
