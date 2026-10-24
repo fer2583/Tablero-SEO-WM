@@ -262,3 +262,43 @@ CREATE INDEX IF NOT EXISTS indexation_runs_latest_idx ON indexation_runs (site_u
 CREATE INDEX IF NOT EXISTS source_snapshots_latest_idx ON source_snapshots (site_url, source, completed_at DESC);
 CREATE INDEX IF NOT EXISTS keyword_history_day_idx ON keyword_history (keyword_target_id, day DESC);
 CREATE INDEX IF NOT EXISTS alerts_site_status_idx ON alerts (site_url, status, detected_at DESC);
+
+-- Crawler v2: additive migration; legacy snapshots remain readable.
+ALTER TABLE audit_runs ADD COLUMN IF NOT EXISTS crawl_state JSONB;
+ALTER TABLE audit_runs ADD COLUMN IF NOT EXISTS lock_token UUID;
+ALTER TABLE audit_runs ADD COLUMN IF NOT EXISTS lock_expires_at TIMESTAMPTZ;
+ALTER TABLE audit_runs ADD COLUMN IF NOT EXISTS rules_version TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS audit_runs_one_active_idx ON audit_runs (site_url)
+  WHERE status IN ('queued', 'running', 'paused');
+
+CREATE TABLE IF NOT EXISTS audit_pages (
+  audit_run_id BIGINT NOT NULL REFERENCES audit_runs(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  result JSONB NOT NULL,
+  PRIMARY KEY (audit_run_id, url)
+);
+CREATE TABLE IF NOT EXISTS audit_links (
+  audit_run_id BIGINT NOT NULL REFERENCES audit_runs(id) ON DELETE CASCADE,
+  source_url TEXT NOT NULL,
+  target_url TEXT NOT NULL,
+  anchor TEXT NOT NULL DEFAULT '',
+  nofollow BOOLEAN NOT NULL DEFAULT FALSE,
+  PRIMARY KEY (audit_run_id, source_url, target_url)
+);
+CREATE INDEX IF NOT EXISTS audit_links_target_idx ON audit_links (audit_run_id, target_url);
+
+CREATE TABLE IF NOT EXISTS audit_browser_reports (
+  id UUID PRIMARY KEY,
+  audit_run_id BIGINT NOT NULL REFERENCES audit_runs(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  criteria_version TEXT NOT NULL,
+  report JSONB NOT NULL
+);
+CREATE INDEX IF NOT EXISTS audit_browser_reports_run_idx ON audit_browser_reports (audit_run_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS audit_browser_artifacts (
+  report_id UUID NOT NULL REFERENCES audit_browser_reports(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  content BYTEA NOT NULL CHECK (octet_length(content) <= 3000000),
+  PRIMARY KEY (report_id, name)
+);

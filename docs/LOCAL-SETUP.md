@@ -29,7 +29,7 @@ La cuenta de servicio necesita acceso de solo lectura a la propiedad GA4 `528336
 
 ## Inicializar Neon/Vercel Postgres
 
-Configura `DATABASE_URL` con la cadena privada de conexión de Neon. En Vercel también puede quedar disponible como `POSTGRES_URL` desde la integración. Ejecuta `src/db/schema.sql` completo en el SQL Editor de Neon, en Vercel Postgres o con `psql "$DATABASE_URL" -f src/db/schema.sql`. El script solo usa `CREATE TABLE/INDEX IF NOT EXISTS` y claves únicas con upsert, por lo que puede repetirse. No se ejecuta durante `next build`.
+Configura `DATABASE_URL` con la cadena privada de conexión de Neon. En Vercel también puede quedar disponible como `POSTGRES_URL` desde la integración. Ejecuta `npm run db:migrate`, o aplica `src/db/schema.sql` completo desde el SQL Editor. El esquema es aditivo e idempotente e incluye las columnas de progreso y tablas del crawler/Playwright. No se ejecuta durante `next build`.
 
 ## Instalar y ejecutar
 
@@ -65,6 +65,6 @@ Las secciones Indexación avanzada, Keywords, Contenido y Alertas no tienen back
 - `status: "unavailable"`: faltan variables, permisos o Google devolvió un error. La aplicación devuelve payload vacío y un error no sensible; no sustituye la respuesta con métricas, filas o fechas generadas.
 - `status: "no_data"`: la consulta fue válida, pero no devolvió filas.
 
-La auditoría técnica también requiere `SITE_URL`; no existe un dominio predeterminado. PageSpeed y CrUX solo se muestran cuando sus APIs responden. El timestamp de respuesta del endpoint es técnico y no se presenta como fecha de actualización de los datos.
+La auditoría técnica está fijada a `https://www.whalemate.com/`. PageSpeed y CrUX solo se muestran cuando sus APIs responden. Si `.env.local` incluye `API_PROXY_ORIGIN`, usar `npm run dev:local` para probar el backend local. La guía [AUDIT-SOURCES.md](AUDIT-SOURCES.md) describe migración, comandos de crawler/Playwright y pruebas.
 
 Para comprobar el estado sin conexión, detén el servidor, elimina temporalmente las variables de Google de `.env.local`, vuelve a ejecutar `npm run dev` y repite la petición. `.env.local` está ignorado por Git.

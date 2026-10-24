@@ -1,30 +1,123 @@
-import { fetchSite, loadSitemap, SITE_URL, siteUrl } from "@/lib/site";
+import { SITE_URL } from "./site";
+import { fetchPage, initializeCrawl, processBatch, readRobots } from "./crawler/engine";
+import { evaluateCrawl } from "./crawler/rules";
+import type { CrawlIssue, CrawlPage, CrawlReport, CrawlState } from "./crawler/types";
 
-export { SITE_URL } from "@/lib/site";
+export { SITE_URL } from "./site";
 export type AuditDevice = "mobile" | "desktop";
 export type SourceStatus = "live" | "partial" | "unavailable" | "error";
-export type AuditIssue = { id: string; category: string; issue: string; severity: "Alta" | "Media" | "Baja"; evidence: string; recommendation: string; status: "open" | "unavailable" };
-export type PsiResult = { status: SourceStatus; message?: string; scores: Record<string, number | null>; metrics: Record<string, number | null>; opportunities: Array<{ title: string; displayValue: string; score: number | null }> };
-export type CruxResult = { status: SourceStatus; message?: string; formFactor: string; origin: string; metrics: Record<string, number | null> };
-export type PageAudit = { url: string; language: string; template: string; httpStatus: number | null; title: string | null; metaDescription: string | null; h1: string[]; h2: string[]; h3: string[]; canonical: string | null; robotsMeta: string | null; openGraph: number | null; jsonLd: number; schemaTypes: string[]; parseErrors: string[]; internalLinks: number | null; imagesWithoutAlt: number | null; redirects: string[]; status: SourceStatus };
+export type AuditIssue = CrawlIssue;
+export type PageAudit = CrawlPage;
+export type SourceDiagnostic = { code: "not_configured" | "no_data" | "quota" | "forbidden" | "invalid_key" | "timeout" | "upstream" | "invalid_response"; httpStatus?: number; retryable: boolean };
+export type PerformanceTask = { status: "running" | "completed" | "error"; url: string; startedAt: string; expiresAt: string; completedAt?: string; message?: string };
+export type PsiResult = { status: SourceStatus; message?: string; diagnostic?: SourceDiagnostic; url?: string; fetchedAt?: string; scores: Record<string, number | null>; metrics: Record<string, number | null>; opportunities: Array<{ title: string; displayValue: string; score: number | null }> };
+export type CruxResult = { status: SourceStatus; message?: string; diagnostic?: SourceDiagnostic; fetchedAt?: string; collectionPeriod?: unknown; scope?: "origin" | "url"; formFactor: string; origin: string; metrics: Record<string, number | null> };
 export type AuditHistory = { id: number; snapshotKey: string; status: string; completedAt: string | null };
-export type AuditData = { siteUrl: string; generatedAt: string; devices: Record<AuditDevice, { psi: PsiResult; crux: CruxResult }>; sources: { psi: SourceStatus; crux: SourceStatus; crawler: SourceStatus; gsc: SourceStatus }; sitemap: { status: SourceStatus; urls: string[]; sitemaps: string[]; message?: string }; crawler: { audited: PageAudit[]; issues: AuditIssue[]; robots: SourceStatus; sitemap: SourceStatus; message?: string }; schema: { audited: number; withJsonLd: number; withoutJsonLd: number; coverage: number | null; byType: Record<string, number>; byLanguage: Record<string, { audited: number; withJsonLd: number }>; withoutSchema: string[]; parseErrors: Array<{ url: string; error: string }>; status: SourceStatus; message?: string }; indexing: { status: SourceStatus; sitemapUrls: number | null; inspected: number | null; indexed: number | null; notIndexed: number | null; errors: number | null; coverage: number | null; rows: Array<{ url: string; verdict: string; declaredCanonical: string | null; googleCanonical: string | null; robots: string | null; lastInspection: string | null; error?: string }>; message?: string }; history: AuditHistory[] | "no_data" };
+export type AuditData = {
+  scope?: "full" | "selective";
+  siteUrl: string; generatedAt: string;
+  devices: Record<AuditDevice, { psi: PsiResult; crux: CruxResult }>;
+  sources: { psi: SourceStatus; crux: SourceStatus; crawler: SourceStatus; gsc: SourceStatus };
+  sitemap: { status: SourceStatus; urls: string[]; sitemaps: string[]; message?: string };
+  crawler: { audited: PageAudit[]; issues: AuditIssue[]; robots: SourceStatus; sitemap: SourceStatus; message?: string; excluded?: CrawlState["excluded"] };
+  schema: { audited: number; withJsonLd: number; withoutJsonLd: number; coverage: number | null; byType: Record<string, number>; byLanguage: Record<string, { audited: number; withJsonLd: number }>; withoutSchema: string[]; parseErrors: Array<{ url: string; error: string }>; status: SourceStatus; message?: string };
+  indexing: { status: SourceStatus; sitemapUrls: number | null; inspected: number | null; indexed: number | null; notIndexed: number | null; errors: number | null; coverage: number | null; rows: Array<{ url: string; verdict: string; declaredCanonical: string | null; googleCanonical: string | null; robots: string | null; lastInspection: string | null; error?: string }>; message?: string };
+  history: AuditHistory[] | "no_data";
+  performancePages?: Record<string, AuditData["devices"]>;
+  performanceTask?: PerformanceTask;
+  report?: CrawlReport; rulesVersion?: string;
+};
+export function emptyPsi(message: string): PsiResult {
+  return { status: "unavailable", message, scores: { performance: null, accessibility: null, bestPractices: null, seo: null }, metrics: { lcp: null, cls: null, tbt: null, fcp: null }, opportunities: [] };
+}
+export function emptyCrux(device: AuditDevice, message: string): CruxResult {
+  return { status: "unavailable", message, formFactor: device, origin: new URL(SITE_URL).origin, scope: "origin", metrics: { lcp: null, inp: null, cls: null, fcp: null, ttfb: null } };
+}
+export function buildAuditSnapshot(state: CrawlState): AuditData {
+  const report = evaluateCrawl(state);
+  const pages = state.pages.filter((page) => page.outcome === "html");
+  const withJsonLd = pages.filter((page) => page.jsonLd > 0).length;
+  const byType: Record<string, number> = {};
+  const byLanguage: AuditData["schema"]["byLanguage"] = {};
+  pages.forEach((page) => {
+    const row = byLanguage[page.language] ?? { audited: 0, withJsonLd: 0 };
+    row.audited++; row.withJsonLd += page.jsonLd > 0 ? 1 : 0;
+    byLanguage[page.language] = row;
+    page.schemaTypes.forEach((type) => { byType[type] = (byType[type] || 0) + 1; });
+  });
+  const complete = !state.queue.length && !state.limitReached && state.sitemap.status === "live" && state.pages.every((page) => page.outcome === "html");
+  const status = state.pages.length ? complete ? "live" : "partial" : "unavailable";
+  return { siteUrl: SITE_URL, scope: state.scope || "full", generatedAt: new Date().toISOString(), rulesVersion: state.version, report,
+    devices: { mobile: { psi: emptyPsi("Ejecutar enriquecimiento de rendimiento."), crux: emptyCrux("mobile", "Ejecutar enriquecimiento de rendimiento.") }, desktop: { psi: emptyPsi("Ejecutar enriquecimiento de rendimiento."), crux: emptyCrux("desktop", "Ejecutar enriquecimiento de rendimiento.") } },
+    sources: { psi: "unavailable", crux: "unavailable", crawler: status, gsc: "unavailable" }, sitemap: state.sitemap,
+    crawler: { audited: state.pages, issues: report.issues, robots: state.robots.status, sitemap: state.sitemap.status, excluded: state.excluded, message: state.message || `${state.pages.length} procesadas; ${state.queue.length} pendientes; ${state.excluded.length} excluidas. ${state.limitReached ? "Se alcanzó un límite de rastreo." : ""}` },
+    schema: { audited: pages.length, withJsonLd, withoutJsonLd: pages.length - withJsonLd, coverage: pages.length ? Math.round(withJsonLd / pages.length * 100) : null, byType, byLanguage, withoutSchema: pages.filter((page) => !page.jsonLd).map((page) => page.url), parseErrors: pages.flatMap((page) => page.parseErrors.map((error) => ({ url: page.url, error }))), status },
+    indexing: { status: "unavailable", sitemapUrls: state.sitemap.urls.length, inspected: null, indexed: null, notIndexed: null, errors: null, coverage: null, rows: [], message: "Indexabilidad HTML no equivale a indexación en Google. Consultar el snapshot de URL Inspection." }, history: "no_data" };
+}
+export async function crawlSiteUrls(urls: string[], limit = 10) {
+  const policy = await readRobots();
+  const selected = urls.slice(0, Math.min(Math.max(limit, 1), 50));
+  const pages: CrawlPage[] = [];
+  for (let i = 0; i < selected.length; i += 4) pages.push(...await Promise.all(selected.slice(i, i + 4).map((url) => fetchPage({ url, sources: ["inspection"], attempts: 0 }, policy))));
+  return pages;
+}
+// CLI/dry-run only. HTTP routes use persisted, bounded batches instead.
+export async function runAudit() {
+  const state = await initializeCrawl();
+  while (state.queue.length && state.robots.status !== "unavailable") {
+    await processBatch(state);
+    if (state.retryAt) break;
+  }
+  return buildAuditSnapshot(state);
+}
 
-const crawlLimit = Math.min(Math.max(Number(process.env.AUDIT_CRAWL_LIMIT || 20), 1), 50);
-const clean = (value: string) => value.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
-const tags = (html: string, tag: string) => [...html.matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, "gi"))].map((m) => clean(m[1])).filter(Boolean);
-const meta = (html: string, name: string) => html.match(new RegExp(`<meta\\b[^>]*?(?:name|property)=["']${name}["'][^>]*?content=["']([^"']*)["'][^>]*>`, "i"))?.[1]?.trim() || null;
-const canonical = (html: string) => html.match(/<link\b[^>]*\brel=["'][^"']*canonical[^"']*["'][^>]*\bhref=["']([^"']+)["'][^>]*>/i)?.[1]?.trim() || html.match(/<link\b[^>]*\bhref=["']([^"']+)["'][^>]*\brel=["'][^"']*canonical[^"']*["'][^>]*>/i)?.[1]?.trim() || null;
-const language = (url: string) => url.includes("/en/") ? "EN" : url.includes("/pt/") ? "PT" : "ES";
-const template = (url: string) => /blog|insights|news/i.test(new URL(url).pathname) ? "Blog" : /jobs|careers|vacan/i.test(new URL(url).pathname) ? "Jobs" : ["/", "/en/", "/pt/"].includes(new URL(url).pathname) ? "Home" : "Page";
-function schema(html: string) { const types: string[] = []; const errors: string[] = []; for (const match of html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) { try { const value = JSON.parse(match[1].trim()); const nodes = Array.isArray(value) ? value : [value]; for (const node of nodes) for (const item of Array.isArray(node?.["@graph"]) ? node["@graph"] : [node]) { const itemTypes = item?.["@type"]; (Array.isArray(itemTypes) ? itemTypes : [itemTypes]).filter(Boolean).forEach((type) => types.push(String(type))); } } catch (error) { errors.push(error instanceof Error ? error.message : "JSON-LD no parseable"); } } return { count: types.length, types: [...new Set(types)], errors }; }
-async function robotsStatus(): Promise<SourceStatus> { try { const result = await fetchSite(new URL("/robots.txt", SITE_URL), "text/plain"); return result.response.ok ? "live" : "unavailable"; } catch { return "unavailable"; } }
-async function auditPage(url: string, robots: SourceStatus): Promise<PageAudit> { const base: PageAudit = { url, language: language(url), template: template(url), httpStatus: null, title: null, metaDescription: null, h1: [], h2: [], h3: [], canonical: null, robotsMeta: null, openGraph: null, jsonLd: 0, schemaTypes: [], parseErrors: [], internalLinks: null, imagesWithoutAlt: null, redirects: [], status: robots === "live" ? "unavailable" : "partial" }; if (robots !== "live") return base; try { const result = await fetchSite(siteUrl(url)); const parsed = schema(result.body); const internalLinks = [...result.body.matchAll(/<a\b[^>]*href=["']([^"'#]+)["']/gi)].filter((match) => { try { return new URL(match[1], url).hostname === new URL(SITE_URL).hostname; } catch { return false; } }).length; return { ...base, httpStatus: result.response.status, title: tags(result.body, "title")[0] || null, metaDescription: meta(result.body, "description"), h1: tags(result.body, "h1"), h2: tags(result.body, "h2"), h3: tags(result.body, "h3"), canonical: canonical(result.body), robotsMeta: meta(result.body, "robots"), openGraph: [...result.body.matchAll(/<meta\b[^>]*(?:property|name)=["']og:[^"']+["']/gi)].length, jsonLd: parsed.count, schemaTypes: parsed.types, parseErrors: parsed.errors, internalLinks, imagesWithoutAlt: [...result.body.matchAll(/<img\b[^>]*>/gi)].filter((match) => !/\balt=["'][^"']*["']/i.test(match[0])).length, redirects: result.redirects, status: "live" }; } catch { return base; } }
-async function crawl(urls: string[], robots: SourceStatus) { const selected = urls.slice(0, crawlLimit); const audited: PageAudit[] = []; for (let i = 0; i < selected.length; i += 4) audited.push(...await Promise.all(selected.slice(i, i + 4).map((url) => auditPage(url, robots)))); return audited; }
-export async function crawlSiteUrls(urls: string[], limit = 10) { return crawl(urls.slice(0, Math.min(Math.max(limit, 1), 50)), await robotsStatus()); }
-function emptyPsi(message: string): PsiResult { return { status: "unavailable", message, scores: { performance: null, accessibility: null, bestPractices: null, seo: null }, metrics: { lcp: null, cls: null, inp: null, tbt: null, fcp: null }, opportunities: [] }; }
-async function psi(device: AuditDevice): Promise<PsiResult> { if (!process.env.PAGESPEED_API_KEY) return emptyPsi("PAGESPEED_API_KEY no está configurada."); try { const query = new URLSearchParams({ url: SITE_URL, key: process.env.PAGESPEED_API_KEY, strategy: device }); ["performance", "accessibility", "best-practices", "seo"].forEach((category) => query.append("category", category)); const response = await fetch(`https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?${query}`, { signal: AbortSignal.timeout(25_000), cache: "no-store" }); if (!response.ok) return emptyPsi(`PageSpeed HTTP ${response.status}`); const json = await response.json(); const audits = json.lighthouseResult?.audits ?? {}; const value = (id: string) => Number.isFinite(audits[id]?.numericValue) ? audits[id].numericValue : null; const score = (id: string) => typeof json.lighthouseResult?.categories?.[id]?.score === "number" ? Math.round(json.lighthouseResult.categories[id].score * 100) : null; type PsiAudit = { details?: { type?: string }; title?: string; displayValue?: string; score?: number | null }; const auditValues = Object.values(audits) as PsiAudit[]; return { status: "live", scores: { performance: score("performance"), accessibility: score("accessibility"), bestPractices: score("best-practices"), seo: score("seo") }, metrics: { lcp: value("largest-contentful-paint"), cls: value("cumulative-layout-shift"), inp: value("interaction-to-next-paint"), tbt: value("total-blocking-time"), fcp: value("first-contentful-paint") }, opportunities: auditValues.filter((item) => ["opportunity", "diagnostic"].includes(item.details?.type || "")).slice(0, 15).map((item) => ({ title: item.title || "Lighthouse audit", displayValue: item.displayValue || "", score: typeof item.score === "number" ? Math.round(item.score * 100) : null })) }; } catch { return emptyPsi("Error o timeout de PageSpeed Insights."); } }
-function emptyCrux(device: AuditDevice, message: string): CruxResult { return { status: "unavailable", message, formFactor: device, origin: new URL(SITE_URL).origin, metrics: { lcp: null, inp: null, cls: null, fcp: null, ttfb: null } }; }
-async function crux(device: AuditDevice): Promise<CruxResult> { if (!process.env.CRUX_API_KEY) return emptyCrux(device, "CRUX_API_KEY no está configurada."); try { const response = await fetch(`https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=${encodeURIComponent(process.env.CRUX_API_KEY)}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ origin: new URL(SITE_URL).origin, formFactor: device === "mobile" ? "PHONE" : "DESKTOP" }), signal: AbortSignal.timeout(15_000), cache: "no-store" }); if (!response.ok) return emptyCrux(device, response.status === 404 ? "CrUX no tiene volumen suficiente." : `CrUX HTTP ${response.status}`); const json = await response.json(); const metric = (name: string) => json.record?.metrics?.[name]?.percentiles?.p75 ?? null; return { status: "live", formFactor: device, origin: new URL(SITE_URL).origin, metrics: { lcp: metric("largest_contentful_paint"), inp: metric("interaction_to_next_paint"), cls: metric("cumulative_layout_shift"), fcp: metric("first_contentful_paint"), ttfb: metric("experimental_time_to_first_byte") ?? metric("round_trip_time") } }; } catch { return emptyCrux(device, "Error o timeout de CrUX."); } }
-function issues(pages: PageAudit[]): AuditIssue[] { const result: AuditIssue[] = []; const add = (id: string, issue: string, evidence: string, category = "On-page") => result.push({ id, issue, evidence, category, severity: "Media", recommendation: "Revisar la plantilla y corregirlo en origen.", status: "open" }); pages.filter((page) => page.status === "live").forEach((page) => { if (page.httpStatus !== 200) add(`http-${page.url}`, "Respuesta HTTP no 200", `${page.url}: HTTP ${page.httpStatus}`, "Salud técnica"); if (!page.title) add(`title-${page.url}`, "Title ausente", page.url); if (!page.metaDescription) add(`description-${page.url}`, "Meta description ausente", page.url); if (!page.h1.length) add(`h1-${page.url}`, "H1 ausente", page.url); if (page.imagesWithoutAlt) add(`alt-${page.url}`, "Imágenes sin ALT", `${page.imagesWithoutAlt} en ${page.url}`, "Accesibilidad"); }); return result; }
-export async function runAudit(): Promise<AuditData> { const sitemap = await loadSitemap(); const urls = sitemap.urls.length ? sitemap.urls : [SITE_URL]; const robots = await robotsStatus(); const [pages, psiResults, cruxResults] = await Promise.all([crawl(urls, robots), Promise.all([psi("mobile"), psi("desktop")]), Promise.all([crux("mobile"), crux("desktop")])]); const devices = { mobile: { psi: psiResults[0], crux: cruxResults[0] }, desktop: { psi: psiResults[1], crux: cruxResults[1] } }; const withJsonLd = pages.filter((page) => page.jsonLd > 0).length; const byType: Record<string, number> = {}; const byLanguage: AuditData["schema"]["byLanguage"] = {}; const parseErrors: Array<{ url: string; error: string }> = []; pages.forEach((page) => { const row = byLanguage[page.language] ?? { audited: 0, withJsonLd: 0 }; row.audited += 1; row.withJsonLd += page.jsonLd > 0 ? 1 : 0; byLanguage[page.language] = row; page.schemaTypes.forEach((type) => { byType[type] = (byType[type] || 0) + 1; }); page.parseErrors.forEach((error) => parseErrors.push({ url: page.url, error })); }); const source = (key: "psi" | "crux") => [devices.mobile[key].status, devices.desktop[key].status].some((status) => status === "live") ? "live" as const : "unavailable" as const; return { siteUrl: SITE_URL, generatedAt: new Date().toISOString(), devices, sources: { psi: source("psi"), crux: source("crux"), crawler: pages.length ? "partial" : "unavailable", gsc: "unavailable" }, sitemap: { status: sitemap.status, urls: sitemap.urls, sitemaps: sitemap.sitemaps, message: sitemap.message }, crawler: { audited: pages, issues: issues(pages), robots, sitemap: sitemap.status, message: `Muestra limitada a ${crawlLimit} URLs por petición; no representa un crawl completo.` }, schema: { audited: pages.length, withJsonLd, withoutJsonLd: pages.filter((page) => page.jsonLd === 0).length, coverage: pages.length ? Math.round(withJsonLd / pages.length * 100) : null, byType, byLanguage, withoutSchema: pages.filter((page) => page.jsonLd === 0).map((page) => page.url), parseErrors, status: pages.length ? "partial" : "unavailable", message: `Cobertura de la muestra de ${crawlLimit} URLs.` }, indexing: { status: "unavailable", sitemapUrls: sitemap.urls.length, inspected: null, indexed: null, notIndexed: null, errors: null, coverage: null, rows: [], message: "La inspección GSC está disponible en Indexación y no se ejecuta dentro de cada auditoría." }, history: "no_data" }; }
+export async function fetchPsi(device: AuditDevice, url = SITE_URL): Promise<PsiResult> {
+  const failed = (diagnostic: SourceDiagnostic, message: string): PsiResult => ({ ...emptyPsi(message), url, fetchedAt: new Date().toISOString(), status: diagnostic.code === "not_configured" ? "unavailable" : "error", diagnostic });
+  if (!process.env.PAGESPEED_API_KEY) return failed({ code: "not_configured", retryable: false }, "PAGESPEED_API_KEY no está configurada.");
+  try {
+    const query = new URLSearchParams({ url, key: process.env.PAGESPEED_API_KEY, strategy: device });
+    ["performance", "accessibility", "best-practices", "seo"].forEach((category) => query.append("category", category));
+    const response = await fetch(`https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?${query}`, { signal: AbortSignal.timeout(90_000), cache: "no-store" });
+    if (!response.ok) {
+      const diagnostic = await googleDiagnostic(response);
+      return failed(diagnostic, diagnosticMessage("PageSpeed", diagnostic));
+    }
+    const json = await response.json();
+    if (json.lighthouseResult?.runtimeError || typeof json.lighthouseResult?.categories?.performance?.score !== "number") return failed({ code: "invalid_response", retryable: true }, "Lighthouse no pudo completar la prueba de esta URL. Reintentar el test.");
+    const audits = json.lighthouseResult?.audits ?? {};
+    const metric = (id: string): number | null => Number.isFinite(audits[id]?.numericValue) ? audits[id].numericValue : null;
+    const score = (id: string): number | null => typeof json.lighthouseResult?.categories?.[id]?.score === "number" ? Math.round(json.lighthouseResult.categories[id].score * 100) : null;
+    type PsiAudit = { details?: { type?: string }; title?: string; displayValue?: string; score?: number | null };
+    return { status: "live", url, fetchedAt: new Date().toISOString(), scores: { performance: score("performance"), accessibility: score("accessibility"), bestPractices: score("best-practices"), seo: score("seo") },
+      metrics: { lcp: metric("largest-contentful-paint"), cls: metric("cumulative-layout-shift"), tbt: metric("total-blocking-time"), fcp: metric("first-contentful-paint") },
+      opportunities: (Object.values(audits) as PsiAudit[]).filter((audit) => ["opportunity", "diagnostic"].includes(audit.details?.type || "")).slice(0, 15).map((audit) => ({ title: audit.title || "Lighthouse", displayValue: audit.displayValue || "", score: typeof audit.score === "number" ? Math.round(audit.score * 100) : null })) };
+  } catch (error) { const timeout = error instanceof Error && /timeout|abort/i.test(error.name + error.message); return failed({ code: timeout ? "timeout" : "upstream", retryable: true }, timeout ? "PageSpeed superó el tiempo de espera de 90 segundos. Reintentar el test." : "No se pudo conectar con PageSpeed Insights. Reintentar el test."); }
+}
+export async function fetchCrux(device: AuditDevice): Promise<CruxResult> {
+  const failed = (diagnostic: SourceDiagnostic, message: string): CruxResult => ({ ...emptyCrux(device, message), fetchedAt: new Date().toISOString(), status: ["no_data", "not_configured"].includes(diagnostic.code) ? "unavailable" : "error", diagnostic });
+  if (!process.env.CRUX_API_KEY) return failed({ code: "not_configured", retryable: false }, "CRUX_API_KEY no está configurada.");
+  try {
+    const response = await fetch(`https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=${encodeURIComponent(process.env.CRUX_API_KEY)}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ origin: new URL(SITE_URL).origin, formFactor: device === "mobile" ? "PHONE" : "DESKTOP" }), signal: AbortSignal.timeout(20_000), cache: "no-store" });
+    if (!response.ok) {
+      if (response.status === 404) return failed({ code: "no_data", httpStatus: 404, retryable: false }, `Google CrUX no tiene datos suficientes para https://www.whalemate.com en ${device === "mobile" ? "mobile" : "desktop"}. No es un error del test de PageSpeed.`);
+      const diagnostic = await googleDiagnostic(response);
+      return failed(diagnostic, diagnosticMessage("CrUX", diagnostic));
+    }
+    const json = await response.json();
+    const metric = (name: string): number | null => { const value = json.record?.metrics?.[name]?.percentiles?.p75; return value == null || !Number.isFinite(Number(value)) ? null : Number(value); };
+    if (!json.record?.metrics || !["largest_contentful_paint", "interaction_to_next_paint", "cumulative_layout_shift"].some((name) => Number.isFinite(metric(name)))) return failed({ code: "invalid_response", retryable: true }, "CrUX respondió sin métricas Core Web Vitals válidas.");
+    return { status: "live", scope: "origin", origin: new URL(SITE_URL).origin, formFactor: device, collectionPeriod: json.record?.collectionPeriod, fetchedAt: new Date().toISOString(), metrics: { lcp: metric("largest_contentful_paint"), inp: metric("interaction_to_next_paint"), cls: metric("cumulative_layout_shift"), fcp: metric("first_contentful_paint"), ttfb: metric("experimental_time_to_first_byte") } };
+  } catch (error) { const timeout = error instanceof Error && /timeout|abort/i.test(error.name + error.message); return failed({ code: timeout ? "timeout" : "upstream", retryable: true }, timeout ? "CrUX superó el tiempo de espera. Reintentar la consulta." : "No se pudo conectar con Google CrUX."); }
+}
+
+async function googleDiagnostic(response: Response): Promise<SourceDiagnostic> {
+  // Use only an allowlisted classification, never expose Google's raw body or credentials.
+  const body = await response.json().catch(() => null);
+  const reasons = JSON.stringify(body?.error?.details || body?.error?.errors || "");
+  const code = response.status === 429 || /QUOTA|RATE_LIMIT|rateLimit|dailyLimit/i.test(reasons) ? "quota" : /API_KEY_INVALID|keyInvalid/i.test(reasons) ? "invalid_key" : response.status === 403 ? "forbidden" : "upstream";
+  return { code, httpStatus: response.status, retryable: code === "quota" || response.status >= 500 };
+}
+function diagnosticMessage(source: string, diagnostic: SourceDiagnostic) {
+  const detail = diagnostic.code === "quota" ? "La cuota de Google está agotada o temporalmente limitada. Reintentar más tarde." : diagnostic.code === "invalid_key" ? "La clave de Google no es válida; revisar la configuración del servidor." : diagnostic.code === "forbidden" ? "Google rechazó el acceso; revisar la API habilitada y las restricciones de la clave." : "Google no pudo completar la consulta. Reintentar más tarde.";
+  return `${source}: ${detail} (HTTP ${diagnostic.httpStatus})`;
+}

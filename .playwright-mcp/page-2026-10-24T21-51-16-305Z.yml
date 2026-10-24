@@ -1,0 +1,69 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - complementary [ref=f3e3]:
+      - img "whalemate" [ref=f3e5]
+      - generic [ref=f3e6]:
+        - generic [ref=f3e7]: W
+        - generic [ref=f3e8]:
+          - text: Whalemate
+          - generic [ref=f3e9]: Fuentes reales
+      - navigation "Navegación principal" [ref=f3e12]:
+        - link "Resumen" [ref=f3e13] [cursor=pointer]:
+          - /url: /
+        - link "Search Console" [ref=f3e20] [cursor=pointer]:
+          - /url: /search-console
+        - link "Analytics" [ref=f3e25] [cursor=pointer]:
+          - /url: /analytics
+        - link "Auditoría técnica" [ref=f3e29] [cursor=pointer]:
+          - /url: /auditoria-tecnica
+        - link "Keywords" [ref=f3e34] [cursor=pointer]:
+          - /url: /keywords
+        - link "Contenido" [ref=f3e40] [cursor=pointer]:
+          - /url: /contenido
+        - link "Alertas" [ref=f3e45] [cursor=pointer]:
+          - /url: /alertas
+        - link "Configuración" [ref=f3e50] [cursor=pointer]:
+          - /url: /configuracion
+      - generic [ref=f3e55]:
+        - generic [ref=f3e56]:
+          - text: Fuentes conectadas
+          - generic [ref=f3e58]: Datos reales, sin mocks
+        - button "WM Whalemate SEO Team" [ref=f3e59] [cursor=pointer]:
+          - generic [ref=f3e60]: WM
+          - generic [ref=f3e61]:
+            - text: Whalemate
+            - generic [ref=f3e62]: SEO Team
+    - main [ref=f3e65]:
+      - generic [ref=f3e66]:
+        - generic [ref=f3e67]:
+          - img "whalemate" [ref=f3e68]
+          - generic [ref=f3e69]: SEO Control Center
+          - generic [ref=f3e70]: /
+          - strong [ref=f3e71]: Auditoría técnica
+        - generic [ref=f3e72]:
+          - generic [ref=f3e73]: Fuentes reales
+          - button "Buscar" [ref=f3e75] [cursor=pointer]
+          - button "Notificaciones" [ref=f3e79] [cursor=pointer]:
+            - generic [ref=f3e83]: "3"
+          - generic [ref=f3e84]: WM
+      - generic [ref=f3e86]:
+        - generic [ref=f3e87]:
+          - generic [ref=f3e88]:
+            - heading "Auditoría Web" [level=1] [ref=f3e89]
+            - paragraph [ref=f3e90]: www.whalemate.com · Sin auditorías publicadas
+            - text: SEO técnico y experiencia renderizada
+          - generic [ref=f3e91]:
+            - button "Auditar sitio" [disabled] [ref=f3e92]
+            - button "Actualizar" [ref=f3e98] [cursor=pointer]
+        - navigation "Secciones de auditoría" [ref=f3e99]:
+          - button "Resumen" [ref=f3e100] [cursor=pointer]
+          - button "Issues" [ref=f3e101] [cursor=pointer]
+          - button "Páginas" [ref=f3e102] [cursor=pointer]
+          - button "Experiencia" [ref=f3e103] [cursor=pointer]
+          - button "Rendimiento" [ref=f3e104] [cursor=pointer]
+          - button "Historial" [ref=f3e105] [cursor=pointer]
+          - button "Configuración" [ref=f3e106] [cursor=pointer]
+        - generic [ref=f3e107]:
+          - strong [ref=f3e110]: Cargando auditorías…
+          - generic [ref=f3e111]: Consultando snapshots persistidos.
+  - alert [ref=f3e112]

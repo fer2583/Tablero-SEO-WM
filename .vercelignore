@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+.env
+.env.*
+!.env.example
+.audit-artifacts
+.playwright-mcp
+coverage
+test-results
+playwright-report

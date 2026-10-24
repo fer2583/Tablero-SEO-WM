@@ -1,0 +1,158 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - complementary [ref=f3e3]:
+      - img "whalemate" [ref=f3e5]
+      - generic [ref=f3e6]:
+        - generic [ref=f3e7]: W
+        - generic [ref=f3e8]:
+          - text: Whalemate
+          - generic [ref=f3e9]: Fuentes reales
+      - navigation "Navegación principal" [ref=f3e12]:
+        - link "Resumen" [ref=f3e13] [cursor=pointer]:
+          - /url: /
+        - link "Search Console" [ref=f3e20] [cursor=pointer]:
+          - /url: /search-console
+        - link "Analytics" [ref=f3e25] [cursor=pointer]:
+          - /url: /analytics
+        - link "Auditoría técnica" [ref=f3e29] [cursor=pointer]:
+          - /url: /auditoria-tecnica
+        - link "Keywords" [ref=f3e34] [cursor=pointer]:
+          - /url: /keywords
+        - link "Contenido" [ref=f3e40] [cursor=pointer]:
+          - /url: /contenido
+        - link "Alertas" [ref=f3e45] [cursor=pointer]:
+          - /url: /alertas
+        - link "Configuración" [ref=f3e50] [cursor=pointer]:
+          - /url: /configuracion
+      - generic [ref=f3e55]:
+        - generic [ref=f3e56]:
+          - text: Fuentes conectadas
+          - generic [ref=f3e58]: Datos reales, sin mocks
+        - button "WM Whalemate SEO Team" [ref=f3e59] [cursor=pointer]:
+          - generic [ref=f3e60]: WM
+          - generic [ref=f3e61]:
+            - text: Whalemate
+            - generic [ref=f3e62]: SEO Team
+    - main [ref=f3e65]:
+      - generic [ref=f3e66]:
+        - generic [ref=f3e67]:
+          - img "whalemate" [ref=f3e68]
+          - generic [ref=f3e69]: SEO Control Center
+          - generic [ref=f3e70]: /
+          - strong [ref=f3e71]: Auditoría técnica
+        - generic [ref=f3e72]:
+          - generic [ref=f3e73]: Fuentes reales
+          - button "Buscar" [ref=f3e75] [cursor=pointer]
+          - button "Notificaciones" [ref=f3e79] [cursor=pointer]:
+            - generic [ref=f3e83]: "3"
+          - generic [ref=f3e84]: WM
+      - generic [ref=f3e86]:
+        - generic [ref=f3e87]:
+          - generic [ref=f3e88]:
+            - heading "Auditoría Web" [level=1] [ref=f3e89]
+            - paragraph [ref=f3e90]: www.whalemate.com · 24/10/2026, 18:51:28
+            - text: SEO técnico y experiencia renderizada
+          - generic [ref=f3e91]:
+            - button "Auditar sitio" [disabled] [ref=f3e92]
+            - button "Actualizar" [disabled] [ref=f3e98]
+        - generic [ref=f3e148]:
+          - generic [ref=f3e150]:
+            - 'heading "Corrida #11 · queued" [level=2] [ref=f3e151]'
+            - paragraph [ref=f3e152]: 0 procesadas · 419 pendientes · 0 bloqueadas · 0 fallidas · 0 excluidas
+          - progressbar "Progreso del crawl" [ref=f3e153]
+          - paragraph [ref=f3e154]: 0 procesadas; 419 pendientes; 0 excluidas.
+          - generic [ref=f3e155]:
+            - button "Pausar al terminar el lote" [ref=f3e156] [cursor=pointer]
+            - button "Reanudar" [disabled] [ref=f3e160]
+            - button "Cancelar" [ref=f3e163] [cursor=pointer]
+        - navigation "Secciones de auditoría" [ref=f3e99]:
+          - button "Resumen" [ref=f3e100] [cursor=pointer]
+          - button "Issues" [ref=f3e101] [cursor=pointer]
+          - button "Páginas" [ref=f3e102] [cursor=pointer]
+          - button "Experiencia" [ref=f3e103] [cursor=pointer]
+          - button "Rendimiento" [ref=f3e104] [cursor=pointer]
+          - button "Historial" [ref=f3e105] [cursor=pointer]
+          - button "Configuración" [ref=f3e106] [cursor=pointer]
+        - generic [ref=f3e113]:
+          - generic [ref=f3e114]:
+            - generic [ref=f3e115]: Salud técnica interna
+            - strong [ref=f3e116]: Sin datos
+            - generic [ref=f3e117]: "Provisional: revisar cobertura"
+          - generic [ref=f3e118]:
+            - generic [ref=f3e119]: Cobertura HTML
+            - strong [ref=f3e120]: 0%
+            - generic [ref=f3e121]: 0 HTML · 0 procesadas
+          - generic [ref=f3e122]:
+            - generic [ref=f3e123]: Problemas
+            - strong [ref=f3e124]: "0"
+            - generic [ref=f3e125]: 0 incidencias · 0 páginas
+          - generic [ref=f3e126]:
+            - generic [ref=f3e127]: Indexabilidad HTML
+            - strong [ref=f3e128]: Sin datos
+            - generic [ref=f3e129]: No equivale a indexación en Google
+        - generic [ref=f3e166]:
+          - generic [ref=f3e167]:
+            - generic [ref=f3e168]: Rastreo
+            - strong [ref=f3e169]: Sin datos
+            - generic [ref=f3e170]: 0 evaluaciones
+          - generic [ref=f3e171]:
+            - generic [ref=f3e172]: Indexabilidad
+            - strong [ref=f3e173]: Sin datos
+            - generic [ref=f3e174]: 0 evaluaciones
+          - generic [ref=f3e175]:
+            - generic [ref=f3e176]: Enlaces
+            - strong [ref=f3e177]: Sin datos
+            - generic [ref=f3e178]: 0 evaluaciones
+          - generic [ref=f3e179]:
+            - generic [ref=f3e180]: Metadatos
+            - strong [ref=f3e181]: Sin datos
+            - generic [ref=f3e182]: 0 evaluaciones
+          - generic [ref=f3e183]:
+            - generic [ref=f3e184]: Contenido
+            - strong [ref=f3e185]: Sin datos
+            - generic [ref=f3e186]: 0 evaluaciones
+          - generic [ref=f3e187]:
+            - generic [ref=f3e188]: Accesibilidad
+            - strong [ref=f3e189]: Sin datos
+            - generic [ref=f3e190]: 0 evaluaciones
+          - generic [ref=f3e191]:
+            - generic [ref=f3e192]: Datos estructurados
+            - strong [ref=f3e193]: Sin datos
+            - generic [ref=f3e194]: 0 evaluaciones
+          - generic [ref=f3e195]:
+            - generic [ref=f3e196]: Internacionalización
+            - strong [ref=f3e197]: Sin datos
+            - generic [ref=f3e198]: 0 evaluaciones
+        - generic [ref=f3e130]:
+          - generic [ref=f3e131]:
+            - heading "Contenido principal" [level=2] [ref=f3e134]
+            - paragraph [ref=f3e135]: 0 palabras extraídas
+            - paragraph [ref=f3e136]: 0/0 páginas con bloques JSON-LD
+            - text: JSON válido no garantiza resultados enriquecidos.
+          - generic [ref=f3e137]:
+            - heading "Respuesta observada" [level=2] [ref=f3e140]
+            - paragraph [ref=f3e141]: Sin datos
+            - text: Tiempo de descarga; no es un Core Web Vital.
+          - generic [ref=f3e142]:
+            - heading "Profundidad desde la home" [level=2] [ref=f3e145]
+            - paragraph [ref=f3e146]: 0 páginas alcanzadas
+            - paragraph [ref=f3e147]: 0 sin camino detectado
+            - text: Las posibles huérfanas requieren cobertura completa y revisión.
+        - generic [ref=f3e199]:
+          - generic [ref=f3e201]:
+            - heading "Comparación con la auditoría anterior" [level=2] [ref=f3e202]
+            - paragraph [ref=f3e203]: Solo se marcan resueltos los criterios reevaluados.
+          - generic [ref=f3e204]:
+            - generic [ref=f3e205]:
+              - text: Nuevas
+              - strong [ref=f3e206]: "0"
+            - generic [ref=f3e207]:
+              - text: Persistentes
+              - strong [ref=f3e208]: "0"
+            - generic [ref=f3e209]:
+              - text: Resueltas
+              - strong [ref=f3e210]: "0"
+            - generic [ref=f3e211]:
+              - text: Sin reevaluar
+              - strong [ref=f3e212]: "0"
+  - alert [ref=f3e112]

@@ -1,0 +1,152 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - complementary [ref=f1e3]:
+      - img "whalemate" [ref=f1e5]
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7]: W
+        - generic [ref=f1e8]:
+          - text: Whalemate
+          - generic [ref=f1e9]: Fuentes reales
+      - navigation "Navegación principal" [ref=f1e12]:
+        - link "Resumen" [ref=f1e13] [cursor=pointer]:
+          - /url: /
+        - link "Search Console" [ref=f1e20] [cursor=pointer]:
+          - /url: /search-console
+        - link "Analytics" [ref=f1e25] [cursor=pointer]:
+          - /url: /analytics
+        - link "Auditoría técnica" [ref=f1e29] [cursor=pointer]:
+          - /url: /auditoria-tecnica
+        - link "Keywords" [ref=f1e34] [cursor=pointer]:
+          - /url: /keywords
+        - link "Contenido" [ref=f1e40] [cursor=pointer]:
+          - /url: /contenido
+        - link "Alertas" [ref=f1e45] [cursor=pointer]:
+          - /url: /alertas
+        - link "Configuración" [ref=f1e50] [cursor=pointer]:
+          - /url: /configuracion
+      - generic [ref=f1e55]:
+        - generic [ref=f1e56]:
+          - text: Fuentes conectadas
+          - generic [ref=f1e58]: Datos reales, sin mocks
+        - button "WM Whalemate SEO Team" [ref=f1e59] [cursor=pointer]:
+          - generic [ref=f1e60]: WM
+          - generic [ref=f1e61]:
+            - text: Whalemate
+            - generic [ref=f1e62]: SEO Team
+    - main [ref=f1e65]:
+      - generic [ref=f1e66]:
+        - generic [ref=f1e67]:
+          - img "whalemate" [ref=f1e68]
+          - generic [ref=f1e69]: SEO Control Center
+          - generic [ref=f1e70]: /
+          - strong [ref=f1e71]: Auditoría técnica
+        - generic [ref=f1e72]:
+          - generic [ref=f1e73]: Fuentes reales
+          - button "Buscar" [ref=f1e75] [cursor=pointer]
+          - button "Notificaciones" [ref=f1e79] [cursor=pointer]:
+            - generic [ref=f1e83]: "3"
+          - generic [ref=f1e84]: WM
+      - generic [ref=f1e86]:
+        - generic [ref=f1e87]:
+          - generic [ref=f1e88]:
+            - heading "Auditoría Web" [level=1] [ref=f1e89]
+            - paragraph [ref=f1e90]: www.whalemate.com · 24/10/2026, 19:12:47
+            - text: SEO técnico y experiencia renderizada
+          - generic [ref=f1e91]:
+            - button "Auditar sitio" [ref=f1e92] [cursor=pointer]
+            - button "Actualizar" [ref=f1e98] [cursor=pointer]
+        - generic [ref=f1e113]:
+          - generic [ref=f1e115]:
+            - 'heading "Corrida #12 · completed" [level=2] [ref=f1e320]'
+            - paragraph [ref=f1e117]: 422 procesadas · 0 pendientes · 0 bloqueadas · 2 fallidas · 0 excluidas
+          - progressbar "Progreso del crawl" [ref=f1e118]
+          - paragraph [ref=f1e119]: 422 procesadas; 0 pendientes; 0 excluidas.
+        - navigation "Secciones de auditoría" [ref=f1e99]:
+          - button "Resumen" [ref=f1e100] [cursor=pointer]
+          - button "Issues" [ref=f1e101] [cursor=pointer]
+          - button "Páginas" [ref=f1e102] [cursor=pointer]
+          - button "Experiencia" [ref=f1e103] [cursor=pointer]
+          - button "Rendimiento" [active] [ref=f1e104] [cursor=pointer]
+          - button "Historial" [ref=f1e105] [cursor=pointer]
+          - button "Configuración" [ref=f1e106] [cursor=pointer]
+        - generic [ref=f1e383]:
+          - generic [ref=f1e385]:
+            - heading "Tests de PageSpeed y Core Web Vitals" [level=2] [ref=f1e386]
+            - paragraph [ref=f1e387]: La home se consulta automáticamente al terminar el crawl general. Las páginas representativas se pueden consultar aquí.
+          - generic [ref=f1e388]:
+            - combobox "URL de rendimiento" [ref=f1e389]:
+              - option "Home · https://www.whalemate.com/" [selected]
+              - option "Blog · ES · https://www.whalemate.com/recursos/blog/"
+              - option "Blog · EN · https://www.whalemate.com/en/resources/blog/"
+              - option "Blog · PT-BR · https://www.whalemate.com/br/recursos/blog/"
+              - option "Glosario · ES · https://www.whalemate.com/recursos/glosario-hrm/"
+              - option "Glosario · EN · https://www.whalemate.com/en/resources/hrm-glossary/"
+              - option "Glosario · PT-BR · https://www.whalemate.com/br/recursos/glossario-hrm/"
+              - option "Page · ES · https://www.whalemate.com/alternativas/"
+              - option "Home · PT-BR · https://www.whalemate.com/br/"
+              - option "Page · PT-BR · https://www.whalemate.com/br/alternativas/"
+              - option "Servicio · PT-BR · https://www.whalemate.com/br/planos/servico-gerenciado/"
+              - option "Home · EN · https://www.whalemate.com/en/"
+              - option "Page · EN · https://www.whalemate.com/en/about-us/"
+              - option "Servicio · EN · https://www.whalemate.com/en/pricing/managed-service/"
+              - option "Servicio · ES · https://www.whalemate.com/planes/servicio-gestionado/"
+            - combobox "Dispositivo" [ref=f1e390]:
+              - option "Mobile" [selected]
+              - option "Desktop"
+            - button "Consultar PageSpeed y CWV" [ref=f1e391] [cursor=pointer]
+            - button "Repetir tests sin caché" [ref=f1e392] [cursor=pointer]
+          - generic [ref=f1e393]: Consultar reutiliza resultados válidos durante 24 h. Repetir solicita una nueva medición a Google. Cada ejecución consulta mobile y desktop.
+        - generic [ref=f1e394]:
+          - generic [ref=f1e395]:
+            - generic [ref=f1e397]:
+              - heading "PageSpeed · Mobile" [level=2] [ref=f1e398]
+              - paragraph [ref=f1e399]: Lighthouse · laboratorio · 24/10/2026, 19:00:31
+            - generic [ref=f1e400]:
+              - generic [ref=f1e401]:
+                - generic [ref=f1e402]: Performance
+                - strong [ref=f1e403]: "55"
+                - generic [ref=f1e404]: /100
+              - generic [ref=f1e405]:
+                - generic [ref=f1e406]: Accesibilidad
+                - strong [ref=f1e407]: "96"
+                - generic [ref=f1e408]: /100
+              - generic [ref=f1e409]:
+                - generic [ref=f1e410]: Buenas prácticas
+                - strong [ref=f1e411]: "92"
+                - generic [ref=f1e412]: /100
+              - generic [ref=f1e413]:
+                - generic [ref=f1e414]: SEO
+                - strong [ref=f1e415]: "100"
+                - generic [ref=f1e416]: /100
+            - generic [ref=f1e417]:
+              - generic [ref=f1e418]:
+                - generic [ref=f1e419]: LCP
+                - generic [ref=f1e420]: 18,24 s
+              - generic [ref=f1e421]:
+                - generic [ref=f1e422]: CLS
+                - generic [ref=f1e423]: 0,020
+              - generic [ref=f1e424]:
+                - generic [ref=f1e425]: FCP
+                - generic [ref=f1e426]: 3,38 s
+              - generic [ref=f1e427]:
+                - generic [ref=f1e428]: TBT
+                - generic [ref=f1e429]: 369 ms
+            - generic [ref=f1e430]: Prueba simulada de esta URL. TBT no es INP y estas mediciones no sustituyen los datos de usuarios reales.
+          - generic [ref=f1e431]:
+            - generic [ref=f1e433]:
+              - heading "Core Web Vitals · Mobile" [level=2] [ref=f1e434]
+              - paragraph [ref=f1e435]: CrUX · usuarios reales · p75 · https://www.whalemate.com
+            - generic [ref=f1e436]:
+              - strong [ref=f1e439]: Google no tiene datos de campo suficientes
+              - generic [ref=f1e440]: CrUX no dispone de una muestra publicable para este origen y dispositivo. Esto no impide ejecutar PageSpeed; INP de usuarios reales queda sin datos hasta que Google publique una muestra.
+        - generic [ref=f1e441]:
+          - generic [ref=f1e443]:
+            - heading "Oportunidades Lighthouse" [level=2] [ref=f1e444]
+            - paragraph [ref=f1e445]: https://www.whalemate.com/
+          - paragraph [ref=f1e446]: Initial server response time was short Root document took 0 ms
+          - paragraph [ref=f1e447]: Minify CSS
+          - paragraph [ref=f1e448]: Avoid multiple page redirects
+          - paragraph [ref=f1e449]: Reduce unused CSS Est savings of 23 KiB
+          - paragraph [ref=f1e450]: Reduce unused JavaScript Est savings of 574 KiB
+          - paragraph [ref=f1e451]: Minify JavaScript
+  - alert [ref=f1e112]

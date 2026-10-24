@@ -82,7 +82,7 @@ export async function saveAuditSnapshot(input: AuditSnapshotInput) {
 
 export async function getLatestAuditSnapshot(siteUrl: string) {
   const result = await getDb().query<{ id: number; snapshotKey: string; status: string; completedAt: string | null; snapshot: unknown }>(
-    `SELECT id, snapshot_key AS "snapshotKey", status, completed_at AS "completedAt", snapshot FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 1`,
+    `SELECT id, snapshot_key AS "snapshotKey", status, completed_at AS "completedAt", snapshot FROM audit_runs WHERE site_url = $1 AND completed_at IS NOT NULL AND (snapshot->>'scope') IS DISTINCT FROM 'selective' ORDER BY completed_at DESC, id DESC LIMIT 1`,
     [siteUrl],
   );
   return result.rows[0] ?? null;
@@ -91,7 +91,7 @@ export async function getLatestAuditSnapshot(siteUrl: string) {
 export async function getAuditHistory(siteUrl: string) {
   const result = await getDb().query<{ id: number; snapshotKey: string; status: string; completedAt: string | null }>(
     `SELECT id, snapshot_key AS "snapshotKey", status, completed_at AS "completedAt"
-     FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 30`,
+     FROM audit_runs WHERE site_url = $1 ORDER BY started_at DESC, id DESC LIMIT 30`,
     [siteUrl],
   );
   return result.rows;
@@ -175,7 +175,7 @@ export async function getLatestAuditIssueCounts(siteUrl: string) {
   const result = await getDb().query<SummaryIssueCounts>(
     `SELECT ai.severity, COUNT(*)::int AS count
      FROM audit_issues ai JOIN audit_runs ar ON ar.id = ai.audit_run_id
-     WHERE ar.site_url = $1 AND ar.id = (SELECT id FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 1)
+      WHERE ar.site_url = $1 AND ar.id = (SELECT id FROM audit_runs WHERE site_url = $1 AND completed_at IS NOT NULL AND (snapshot->>'scope') IS DISTINCT FROM 'selective' ORDER BY completed_at DESC, id DESC LIMIT 1)
      GROUP BY ai.severity`,
     [siteUrl],
   );
@@ -185,10 +185,10 @@ export async function getLatestAuditIssueCounts(siteUrl: string) {
 export async function getLatestAuditVitals(siteUrl: string) {
   const result = await getDb().query<{ device: string; kind: string; status: string; scores: unknown; metrics: unknown }>(
     `SELECT device, 'pagespeed' AS kind, status, scores, metrics FROM pagespeed_results
-     WHERE site_url = $1 AND audit_run_id = (SELECT id FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 1)
+      WHERE site_url = $1 AND audit_run_id = (SELECT id FROM audit_runs WHERE site_url = $1 AND completed_at IS NOT NULL AND (snapshot->>'scope') IS DISTINCT FROM 'selective' ORDER BY completed_at DESC, id DESC LIMIT 1)
      UNION ALL
      SELECT form_factor AS device, 'crux' AS kind, status, '{}'::jsonb AS scores, metrics FROM crux_results
-     WHERE site_url = $1 AND audit_run_id = (SELECT id FROM audit_runs WHERE site_url = $1 ORDER BY completed_at DESC NULLS LAST LIMIT 1)`,
+      WHERE site_url = $1 AND audit_run_id = (SELECT id FROM audit_runs WHERE site_url = $1 AND completed_at IS NOT NULL AND (snapshot->>'scope') IS DISTINCT FROM 'selective' ORDER BY completed_at DESC, id DESC LIMIT 1)`,
     [siteUrl],
   );
   return result.rows;

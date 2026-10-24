@@ -1,88 +1,201 @@
 "use client";
 
-import Image from "next/image";
-import { AlertTriangle, ChevronDown, Clock3, RefreshCw, Settings2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { AuditData, AuditDevice, AuditHistory, AuditIssue, PageAudit, PsiResult } from "@/lib/audit";
+import { AlertTriangle, Pause, Play, RefreshCw, Square } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { AuditData, AuditDevice, AuditHistory, AuditIssue, PageAudit } from "@/lib/audit";
+import type { RunView } from "@/lib/crawler/service";
+import type { BrowserReport } from "@/lib/browser-audit/types";
 import { Card, CardHeader, EmptyState, StatusPill } from "@/components/ui";
 import { DataTable, type TableColumn } from "@/components/data-table";
+import { PerformancePanel, PerformanceSummary } from "@/components/performance-panel";
 
-const tabs = ["Resumen", "Issues", "Páginas", "Rendimiento", "Historial", "Configuración"] as const;
-const number = (value: number | null | undefined) => value == null ? "No data" : value.toLocaleString("es-ES");
-const date = (value: string | null | undefined) => value ? new Date(value).toLocaleString("es-ES") : "No data";
+const tabs = ["Resumen", "Issues", "Páginas", "Experiencia", "Rendimiento", "Historial", "Configuración"] as const;
+const date = (value?: string | null) => value ? new Date(value).toLocaleString("es-ES") : "Sin datos";
+const number = (value?: number | null) => value == null ? "Sin datos" : value.toLocaleString("es-ES");
+async function request<T>(path: string, body?: unknown): Promise<T> {
+  const response = await fetch(path, { method: body === undefined ? "GET" : "POST", cache: "no-store", headers: body === undefined ? undefined : { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+  return payload as T;
+}
+function exportRows(name: string, rows: unknown) {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(rows, null, 2)], { type: "application/json" }));
+  const anchor = document.createElement("a"); anchor.href = url; anchor.download = name; anchor.click(); URL.revokeObjectURL(url);
+}
 
 export function AuditPanel() {
   const [data, setData] = useState<AuditData | null>(null);
+  const [run, setRun] = useState<RunView | null>(null);
+  const [history, setHistory] = useState<AuditHistory[]>([]);
   const [tab, setTab] = useState<(typeof tabs)[number]>("Resumen");
   const [device, setDevice] = useState<AuditDevice>("mobile");
   const [loading, setLoading] = useState(true);
+  const [working, setWorking] = useState(false);
+  const [driving, setDriving] = useState(false);
   const [error, setError] = useState("");
-  const load = async (refresh = false) => {
-    setLoading(true); setError("");
+  const [maxUrls, setMaxUrls] = useState(2000);
+  const [clock, setClock] = useState(() => Date.now());
+  const pendingAction = useRef<"pause" | "cancel" | null>(null);
+  const busy = useRef(false);
+  const apply = useCallback((view: RunView) => {
+    setRun(view); setData(view.snapshot);
+    if (view.snapshot.history !== "no_data") setHistory(view.snapshot.history);
+  }, []);
+  const load = useCallback(async () => {
+    setError(""); setLoading(true);
     try {
-      const response = await fetch(`/api/audit${refresh ? "?refresh=1" : ""}`, { cache: "no-store" });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "La auditoría no pudo responder.");
-      setData(payload);
+      const payload = await request<{ snapshot: AuditData | null; activeRun: RunView | null; latestRunId: number | null; history: AuditHistory[]; config?: { maxUrls: number } }>("/api/audit");
+      setHistory(payload.history);
+      if (payload.config) setMaxUrls(payload.config.maxUrls);
+      if (payload.activeRun) { apply(payload.activeRun); setDriving(["queued", "running"].includes(payload.activeRun.status)); }
+      else {
+        setData(payload.snapshot); setRun(null);
+        if (payload.latestRunId) {
+          // Older snapshots remain readable even when they have no v2 state.
+          const response = await fetch(`/api/audit/runs/${payload.latestRunId}`, { cache: "no-store" });
+          if (response.ok) apply(await response.json());
+        }
+      }
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Error de conexión"); }
     finally { setLoading(false); }
-  };
-  useEffect(() => { const timer = window.setTimeout(() => { void load(); }, 0); return () => window.clearTimeout(timer); }, []);
-  if (loading && !data) return <div className="analytics-workspace audit-workspace"><div className="audit-skeleton" aria-label="Cargando auditoría"><i /><i /><i /><i /></div></div>;
-  if (!data) return <div className="analytics-workspace audit-workspace"><EmptyState title="No data available" detail={error || "No existe un snapshot de auditoría."} /><button className="primary-button" onClick={() => void load()}><RefreshCw size={14} /> Reintentar</button></div>;
+  }, [apply]);
+  useEffect(() => { const timer = setTimeout(() => { void load(); }, 0); return () => clearTimeout(timer); }, [load]);
+  useEffect(() => { if (!run?.retryAt) return; const timer = setInterval(() => setClock(Date.now()), 1000); return () => clearInterval(timer); }, [run?.retryAt]);
+  const performanceRunId = run?.id;
+  const performanceRunning = run?.snapshot.performanceTask?.status === "running";
+  useEffect(() => {
+    if (!performanceRunId || !performanceRunning) return;
+    let cancelled = false;
+    let pending = false;
+    const timer = setInterval(async () => {
+      if (pending) return;
+      pending = true;
+      try {
+        const view = await request<RunView>(`/api/audit/runs/${performanceRunId}`);
+        if (!cancelled) { apply(view); setError(""); }
+      } catch (reason) { if (!cancelled) setError(reason instanceof Error ? reason.message : "No se pudo actualizar el rendimiento."); }
+      finally { pending = false; }
+    }, 2500);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [performanceRunId, performanceRunning, apply]);
 
-  const hostname = new URL(data.siteUrl).hostname;
-  const pages = data.crawler.audited;
-  const issues = data.crawler.issues;
-  const psi = data.devices[device].psi;
-  const incomplete = data.sitemap.urls.length > pages.length || data.sources.crawler === "partial";
+  useEffect(() => {
+    if (!driving || !run || !["queued", "running"].includes(run.status)) return;
+    const timer = setTimeout(async () => {
+      if (busy.current) return;
+      busy.current = true; setWorking(true);
+      try {
+        const view = await request<RunView>(`/api/audit/runs/${run.id}/process`, {});
+        if (pendingAction.current && ["queued", "running", "paused"].includes(view.status)) {
+          const action = pendingAction.current; pendingAction.current = null;
+          apply(await request<RunView>(`/api/audit/runs/${run.id}/actions`, { action })); setDriving(false);
+        } else { apply(view); if (["completed", "paused", "cancelled"].includes(view.status)) setDriving(false); }
+      } catch (reason) { setDriving(false); setError(reason instanceof Error ? reason.message : "Error de lote. Podés reanudar sin perder resultados."); }
+      finally { busy.current = false; setWorking(false); }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [run, driving, apply]);
+
+  const start = async (urls?: string[]) => {
+    setWorking(true); setError(""); pendingAction.current = null;
+    try { const view = await request<RunView>("/api/audit/runs", { urls, maxUrls }); apply(view); setDriving(["queued", "running"].includes(view.status)); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "No se pudo iniciar."); }
+    finally { setWorking(false); }
+  };
+  const action = async (value: "pause" | "resume" | "cancel") => {
+    if (!run) return;
+    if (busy.current && value !== "resume") { pendingAction.current = value; setDriving(false); return; }
+    setWorking(true); setError("");
+    try { const view = await request<RunView>(`/api/audit/runs/${run.id}/actions`, { action: value }); apply(view); setDriving(value === "resume"); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "No se pudo cambiar el estado."); }
+    finally { setWorking(false); }
+  };
+  const openRun = async (id: number) => {
+    setError("");
+    try { apply(await request<RunView>(`/api/audit/runs/${id}`)); setDriving(false); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "Snapshot histórico anterior a v2."); }
+  };
+  const active = !!run && ["queued", "running", "paused"].includes(run.status);
   return <div className="analytics-workspace audit-workspace">
     <header className="analytics-header audit-header">
-      <div className="audit-title"><Image src="/whalemate-logo-header.webp" alt="" width={100} height={54} className="audit-thumbnail" /><div><button className="analytics-breadcrumb" onClick={() => window.history.back()}>← <span>Dashboards</span></button><h1>Auditoría Web</h1><p className="analytics-period">{hostname} · Última auditoría: {date(data.generatedAt)}</p><small>{number(pages.length)} páginas auditadas · {number(issues.length)} issues · Estado: {data.sources.crawler === "live" ? "Live" : "Partial"}</small></div></div>
-      <div className="analytics-actions"><button className="audit-run-button" onClick={() => void load(true)} disabled={loading}><RefreshCw className={loading ? "spin" : ""} size={16} /> {loading ? "Auditando..." : "Auditar ahora"}</button><button aria-label="Cambiar dispositivo" onClick={() => setDevice(device === "mobile" ? "desktop" : "mobile")}><span>{device}</span><ChevronDown size={15} /></button></div>
+      <div><h1>Auditoría Web</h1><p className="analytics-period">www.whalemate.com · {data ? date(data.generatedAt) : "Sin auditorías publicadas"}</p><small>{data?.scope === "selective" ? "Reauditoría selectiva" : "SEO técnico y experiencia renderizada"}</small></div>
+      <div className="analytics-actions"><button className="audit-run-button" disabled={working || active || loading} onClick={() => void start()}><RefreshCw size={16} className={working ? "spin" : ""} /> Auditar sitio</button><button disabled={working} onClick={() => void load()}>Actualizar</button></div>
     </header>
-    {error && <div className="state-box audit-error"><AlertTriangle size={17} /><strong>Error de conexión</strong><span>{error}</span></div>}
-    <nav className="analytics-tabs audit-tabs" aria-label="Secciones de auditoría">{tabs.map((item) => <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>{item}{item === "Issues" ? ` (${issues.length})` : item === "Páginas" ? ` (${pages.length})` : ""}</button>)}</nav>
-    {tab === "Resumen" && <Summary data={data} incomplete={incomplete} />}
-    {tab === "Issues" && <Issues issues={issues} />}
-    {tab === "Páginas" && <Pages pages={pages} />}
-    {tab === "Rendimiento" && <Performance data={data} device={device} psi={psi} />}
-    {tab === "Historial" && <History history={data.history} />}
-    {tab === "Configuración" && <Configuration data={data} />}
+    {error && <div className="state-box audit-error" role="alert"><AlertTriangle size={17} /><span>{error}</span></div>}
+    {run && <Card><CardHeader title={`Corrida #${run.id} · ${run.status}`} detail={`${run.progress.processed} procesadas · ${run.progress.pending} pendientes · ${run.progress.blocked} bloqueadas · ${run.progress.failed} fallidas · ${run.progress.excluded} excluidas`} />
+      <progress className="crawl-progress" max={Math.max(1, run.progress.processed + run.progress.pending)} value={run.progress.processed} aria-label="Progreso del crawl" />
+      <p aria-live="polite">{run.snapshot.crawler.message}{run.retryAt ? ` Reintentar después de ${date(run.retryAt)}.` : ""}</p>
+      {run.progress.limitReached && <p className="audit-muted">Cobertura limitada por la configuración; consultar exclusiones.</p>}
+      {active && <div className="crawl-actions"><button onClick={() => void action("pause")} disabled={run.status === "paused"}><Pause size={14} /> Pausar al terminar el lote</button><button onClick={() => void action("resume")} disabled={working || driving || (!!run.retryAt && Date.parse(run.retryAt) > clock)}><Play size={14} /> Reanudar</button><button onClick={() => void action("cancel")}><Square size={14} /> Cancelar</button></div>}
+    </Card>}
+    <nav className="analytics-tabs audit-tabs" aria-label="Secciones de auditoría">{tabs.map((item) => <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>{item}</button>)}</nav>
+    {loading && !data ? <EmptyState title="Cargando auditorías…" detail="Consultando snapshots persistidos." /> : !data ? <EmptyState title="Todavía no hay una auditoría" detail="Iniciá una corrida para analizar el sitio completo. El progreso se conserva al cerrar esta página." /> : <>
+      {tab === "Resumen" && <Summary data={data} />}
+      {tab === "Issues" && <Issues issues={data.crawler.issues} disabled={working || active} recheck={(urls) => void start(urls)} />}
+      {tab === "Páginas" && <Pages data={data} disabled={working || active} recheck={(urls) => void start(urls)} />}
+      {tab === "Experiencia" && <Experience reports={(run?.browserReports || []) as BrowserReport[]} runId={run?.id} />}
+      {tab === "Rendimiento" && <PerformancePanel key={run?.id} data={data} run={run} device={device} setDevice={setDevice} apply={apply} />}
+      {tab === "Configuración" && <Card><CardHeader title="Configuración y cobertura" detail="La nueva configuración se aplica a la próxima corrida." /><label className="crawl-config">Máximo de URLs <input type="number" min={1} max={10000} value={maxUrls} onChange={(event) => setMaxUrls(Number(event.target.value))} /></label><p>Reglas: {data.rulesVersion || "Snapshot anterior a v2"} · Robots: {data.crawler.robots} · Sitemap: {data.sitemap.status}</p><p>{run ? `Lote ${run.config.batchSize}; concurrencia ${run.config.concurrency}; parámetros ${run.config.maxQueryUrls}; profundidad ${run.config.maxDepth}.` : "Configuración de servidor pendiente de una corrida nueva."}</p><p>PSI: {data.sources.psi} · CrUX: {data.sources.crux} · GSC: {data.sources.gsc}</p><details><summary>Exclusiones ({data.crawler.excluded?.length || 0})</summary>{data.crawler.excluded?.map((item) => <p key={item.url}>{item.reason}: {item.url}</p>)}</details></Card>}
+    </>}
+    {tab === "Historial" && <Card><CardHeader title="Historial" detail="Las reauditorías selectivas no reemplazan la salud general del sitio." /><div className="history-list">{history.map((item) => <div key={item.id}><button disabled={active || working} onClick={() => void openRun(item.id)}>Ver #{item.id}</button><span>{date(item.completedAt)} · {item.status}</span></div>)}</div></Card>}
   </div>;
 }
 
-function Summary({ data, incomplete }: { data: AuditData; incomplete: boolean }) {
-  const pages = data.crawler.audited; const issues = data.crawler.issues;
-  const score = pages.length ? Math.max(0, Math.round(100 - issues.reduce((total, issue) => total + (issue.severity === "Alta" ? 8 : issue.severity === "Media" ? 3 : 1), 0) / pages.length * 10)) : null;
-  const severity = ["Alta", "Media", "Baja"].map((level) => ({ label: level, count: issues.filter((issue) => issue.severity === level).length }));
-  const livePages = pages.filter((page) => page.status === "live");
-  const http = livePages.reduce<Record<string, number>>((result, page) => { const key = page.httpStatus == null ? "No data" : String(page.httpStatus); result[key] = (result[key] || 0) + 1; return result; }, {});
+function Summary({ data }: { data: AuditData }) {
+  const pages = data.crawler.audited;
+  const report = data.report;
+  const html = pages.filter((page) => page.outcome === "html");
+  const indexable = html.filter((page) => page.indexable).length;
   return <>
-    {incomplete && <div className="audit-warning"><AlertTriangle size={17} /><div><strong>Hay páginas no analizadas</strong><span>{data.crawler.message || `${Math.max(0, data.sitemap.urls.length - pages.length)} URLs del sitemap no tienen respuesta del crawler.`}</span></div></div>}
-    <div className="audit-summary-grid"><AuditKpi label="Score técnico" value={score == null ? "No data" : `${score}/100`} detail={score == null ? "Se necesitan páginas auditadas e issues reales." : "Calculado desde issues del crawler."} tone={score == null ? "neutral" : score >= 80 ? "success" : score >= 50 ? "warning" : "error"} /><AuditKpi label="Issues detectados" value={number(issues.length)} detail={severity.map((item) => `${item.label}: ${item.count}`).join(" · ")} tone={issues.some((issue) => issue.severity === "Alta") ? "error" : issues.length ? "warning" : "success"} /><AuditKpi label="Páginas analizadas" value={`${number(pages.length)} / ${number(data.sitemap.urls.length || null)}`} detail="Sitemap y crawler propio" tone={incomplete ? "warning" : "success"} /><AuditKpi label="Indexabilidad" value="No data" detail={data.sources.gsc === "unavailable" ? "Search Console no disponible" : "Sin estado de indexación en este snapshot"} tone="neutral" /></div>
-    <div className="audit-section-title">Datos del rastreo</div><div className="audit-card-grid"><HttpCard values={http} /><NoDataCard title="Tiempo de respuesta" detail="El crawler no persiste duración de requests." /><LinksCard pages={pages} /></div>
-    <div className="audit-card-grid"><SchemaCard data={data} /><NoDataCard title="Profundidad de click" detail="No se calcula profundidad del árbol de navegación." /><ContentCard pages={pages} /></div>
-    <div className="audit-section-title">Puntuación por categoría</div><CategoryCards issues={issues} pages={pages} />
-    <div className="audit-section-title">Core Web Vitals · {data.devices.mobile.crux.status === "live" ? "Mobile y Desktop" : "PageSpeed / CrUX"}</div><Vitals data={data} />
-    <Card className="audit-no-data-card"><CardHeader title="GEO Readiness" detail="No se muestra sin una fuente real de datos GEO." /><EmptyState title="No data available" detail="No hay una integración GEO configurada." /></Card>
-    <Issues issues={issues.slice(0, 10)} compact />
+    <div className="audit-summary-grid"><Kpi label="Salud técnica interna" value={report?.score == null ? "Sin datos" : `${report.score}/100`} detail={data.sources.crawler === "live" ? "Reglas ponderadas; no predice posiciones" : "Provisional: revisar cobertura"} /><Kpi label="Cobertura HTML" value={report ? `${report.coverage}%` : "Sin datos"} detail={`${html.length} HTML · ${pages.length} procesadas`} /><Kpi label="Problemas" value={number(report?.groups.length)} detail={`${data.crawler.issues.length} incidencias · ${new Set(data.crawler.issues.map((item) => item.url)).size} páginas`} /><Kpi label="Indexabilidad HTML" value={html.length ? `${indexable}/${html.length}` : "Sin datos"} detail="No equivale a indexación en Google" /></div>
+    <div className="category-grid">{report?.categories.map((item) => <div className="category-card" key={item.category}><span>{item.category}</span><strong>{number(item.score)}</strong><small>{item.evaluated} evaluaciones</small></div>)}</div>
+    <div className="audit-card-grid"><Card><CardHeader title="Contenido principal" /><p>{number(html.reduce((sum, page) => sum + page.wordCount, 0))} palabras extraídas</p><p>{data.schema.withJsonLd}/{data.schema.audited} páginas con bloques JSON-LD</p><small>JSON válido no garantiza resultados enriquecidos.</small></Card><Card><CardHeader title="Respuesta observada" /><p>{html.length ? `${Math.round(html.reduce((sum, page) => sum + page.durationMs, 0) / html.length)} ms promedio` : "Sin datos"}</p><small>Tiempo de descarga; no es un Core Web Vital.</small></Card><Card><CardHeader title="Profundidad desde la home" /><p>{html.filter((page) => page.depth != null).length} páginas alcanzadas</p><p>{html.filter((page) => page.depth == null).length} sin camino detectado</p><small>Las posibles huérfanas requieren cobertura completa y revisión.</small></Card></div>
+    {report && <Card><CardHeader title="Comparación con la auditoría anterior" detail="Solo se marcan resueltos los criterios reevaluados." /><div className="audit-stat-list"><span>Nuevas<strong>{report.comparison.new.length}</strong></span><span>Persistentes<strong>{report.comparison.persistent.length}</strong></span><span>Resueltas<strong>{report.comparison.resolved.length}</strong></span><span>Sin reevaluar<strong>{report.comparison.unevaluated.length}</strong></span></div></Card>}
+    {data.indexing.rows.length > 0 && <Card><CardHeader title="URL Inspection · muestra persistida" detail={data.indexing.message} /><p>{data.indexing.indexed} indexadas de {data.indexing.inspected} inspeccionadas.</p></Card>}
+    <PerformanceSummary data={data} />
+  </>;
+}
+function Kpi({ label, value, detail }: { label: string; value: string; detail: string }) { return <div className="audit-kpi-card neutral"><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>; }
+
+function Issues({ issues, disabled, recheck }: { issues: AuditIssue[]; disabled: boolean; recheck: (urls: string[]) => void }) {
+  const groups = new Map<string, AuditIssue[]>();
+  issues.forEach((issue) => { const key = issue.rule || issue.issue; groups.set(key, [...(groups.get(key) || []), issue]); });
+  return <Card><CardHeader title={`${groups.size} tipos de problemas · ${issues.length} incidencias`} action={<button onClick={() => exportRows("audit-issues.json", issues)}>Exportar JSON</button>} /><div className="issue-list">{[...groups.entries()].map(([key, values]) => <details className="crawl-issue" key={key}><summary><StatusPill tone={values[0].severity === "Alta" ? "error" : "warning"}>{values[0].severity}</StatusPill> {values[0].issue} · {values.length} URLs {values[0].evaluation === "review" ? "· revisión humana" : ""}</summary><p>{values[0].recommendation}</p><button disabled={disabled} onClick={() => recheck(values.slice(0, 100).map((item) => item.url))}>Reauditar hasta 100 URLs</button>{values.map((issue) => <div className="crawl-evidence" key={issue.id}><a href={issue.url} target="_blank" rel="noreferrer">{issue.url || issue.id}</a><p>{issue.evidence}</p></div>)}</details>)}</div>{!issues.length && <EmptyState title="Sin incidencias detectadas" detail="Consultar la cobertura antes de interpretar el resultado." />}</Card>;
+}
+
+function Pages({ data, recheck, disabled }: { data: AuditData; recheck: (urls: string[]) => void; disabled: boolean }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const page = data.crawler.audited.find((item) => item.url === selected);
+  const columns: TableColumn<PageAudit>[] = [
+    { key: "url", label: "URL", sortValue: (row) => row.url, filter: "text", render: (row) => <button className="crawl-url" onClick={() => setSelected(row.url)}>{row.url}</button> },
+    { key: "language", label: "Idioma", sortValue: (row) => row.language, filter: "select", options: ["ES", "EN", "PT-BR"] },
+    { key: "template", label: "Plantilla", sortValue: (row) => row.template, filter: "text" },
+    { key: "outcome", label: "Estado", sortValue: (row) => row.outcome || row.status, filter: "text" },
+    { key: "http", label: "HTTP", sortValue: (row) => row.httpStatus || 0 },
+    { key: "depth", label: "Profundidad", sortValue: (row) => row.depth ?? -1, render: (row) => row.depth ?? "No alcanzada" },
+    { key: "impressions", label: "Impresiones GSC", sortValue: (row) => row.traffic?.impressions || 0, render: (row) => number(row.traffic?.impressions) },
+  ];
+  return <><Card><CardHeader title="Páginas" detail="Seleccionar una URL para ver su diagnóstico." action={<button onClick={() => exportRows("audit-pages.json", data.crawler.audited)}>Exportar JSON</button>} /><DataTable columns={columns} rows={data.crawler.audited} rowKey={(row) => row.url} label="páginas" storageKey="audit-pages-filters-v1" /></Card>
+    {page && <Card><CardHeader title={page.url} action={<button onClick={() => setSelected(null)}>Cerrar</button>} /><button disabled={disabled} onClick={() => recheck([page.url])}>Reauditar URL</button><div className="audit-stat-list"><span>Resultado<strong>{page.outcome || page.status} · HTTP {page.httpStatus}</strong></span><span>Title<strong>{page.title || "Ausente"}</strong></span><span>Description<strong>{page.metaDescription || "Ausente"}</strong></span><span>Canonical<strong>{page.canonical || "Sin declaración"}</strong></span><span>Robots<strong>{page.robotsMeta || "Sin meta"} · {page.xRobotsTag || "Sin cabecera"}</strong></span><span>H1<strong>{page.h1.join(" · ") || "Ausente"}</strong></span><span>JSON-LD<strong>{page.jsonLd} bloques · {page.schemaEntities ?? "?"} entidades · {page.schemaTypes.join(", ")}</strong></span><span>Respuesta<strong>{number(page.durationMs)} ms · {page.wordCount ?? "?"} palabras</strong></span></div>{page.error && <p>{page.error}</p>}{page.traffic && <p>Prioridad: {page.traffic.impressions} impresiones, {page.traffic.clicks} clics y {page.traffic.users} usuarios de landing page · {page.traffic.start} a {page.traffic.end}.</p>}<details><summary>Enlaces entrantes</summary>{data.crawler.audited.filter((item) => item.links?.some((link) => link.url === page.url)).map((item) => <p key={item.url}>{item.url}</p>)}</details><details><summary>Enlaces salientes ({page.links?.length || 0})</summary>{page.links?.map((link) => <p key={link.url}>{link.text}: {link.url}</p>)}</details><details><summary>Hreflang</summary>{page.hreflang?.map((item) => <p key={`${item.language}-${item.url}`}>{item.language}: {item.url}</p>)}</details>{data.crawler.issues.filter((item) => item.url === page.url).map((item) => <p key={item.id}><b>{item.issue}:</b> {item.evidence}</p>)}</Card>}
   </>;
 }
 
-function AuditKpi({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: string }) { return <div className={`audit-kpi-card ${tone}`}><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>; }
-function HttpCard({ values }: { values: Record<string, number> }) { const entries = Object.entries(values); return <Card><CardHeader title="Códigos HTTP" detail="Respuestas registradas por el crawler." />{entries.length ? <div className="audit-bars">{entries.map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b><i><em style={{ width: `${Math.min(100, value / Math.max(...Object.values(values)) * 100)}%` }} /></i></div>)}</div> : <EmptyState title="No data available" detail="No hay respuestas HTTP persistidas." />}</Card>; }
-function LinksCard({ pages }: { pages: PageAudit[] }) { const links = pages.map((page) => page.internalLinks).filter((value): value is number => value != null); const redirects = pages.reduce((total, page) => total + page.redirects.length, 0); return <Card><CardHeader title="Perfil de enlaces" detail="Enlaces internos y redirects del crawler." />{links.length ? <div className="audit-stat-list"><span>Enlaces internos<strong>{number(links.reduce((a, b) => a + b, 0))}</strong></span><span>Promedio por página<strong>{(links.reduce((a, b) => a + b, 0) / links.length).toFixed(1).replace(".", ",")}</strong></span><span>Redirects<strong>{number(redirects)}</strong></span></div> : <EmptyState title="No data available" detail="El crawler no devolvió perfil de enlaces." />}</Card>; }
-function SchemaCard({ data }: { data: AuditData }) { return <Card><CardHeader title="Datos estructurados" detail="JSON-LD parseable, no validación Rich Results." />{data.schema.coverage == null ? <EmptyState title="No data available" detail={data.schema.message || "No hay páginas auditadas."} /> : <><strong className="audit-big-number">{data.schema.coverage}%</strong><span className="audit-muted">{data.schema.withJsonLd} de {data.schema.audited} páginas con JSON-LD</span><Progress value={data.schema.coverage} /></>}</Card>; }
-function ContentCard({ pages }: { pages: PageAudit[] }) { const titles = pages.filter((page) => page.title).length; return <Card><CardHeader title="Calidad de contenido" detail="La auditoría actual no extrae palabras ni contenido escaso." /><div className="audit-stat-list"><span>Titles disponibles<strong>{pages.length ? `${titles}/${pages.length}` : "No data"}</strong></span><span>Total de palabras<strong>No data</strong></span><span>Contenido escaso<strong>No data</strong></span></div></Card>; }
-function NoDataCard({ title, detail }: { title: string; detail: string }) { return <Card><CardHeader title={title} /><EmptyState title="No data available" detail={detail} /></Card>; }
-function CategoryCards({ issues, pages }: { issues: AuditIssue[]; pages: PageAudit[] }) { const categories = [...new Set([...issues.map((issue) => issue.category), "Rastreo", "Etiquetas Meta", "Enlaces", "Velocidad", "Contenido"])]; return <div className="category-grid">{categories.map((category) => { const count = issues.filter((issue) => issue.category === category).length; const value = pages.length ? Math.max(0, Math.round(100 - count / pages.length * 100)) : null; return <div className="category-card" key={category}><span>{category}</span><strong>{value == null ? "No data" : value}</strong>{value != null && <Progress value={value} />}<small>{count ? `${count} issue${count === 1 ? "" : "s"}` : "Sin issues"}</small></div>; })}</div>; }
-function Progress({ value }: { value: number }) { return <i className="audit-progress"><em style={{ width: `${value}%` }} /></i>; }
-function Vitals({ data }: { data: AuditData }) { return <div className="vitals-grid">{(["mobile", "desktop"] as AuditDevice[]).map((device) => <Card key={device}><CardHeader title={`${device === "mobile" ? "Mobile" : "Desktop"} · PageSpeed + CrUX`} /><div className="vitals-columns"><MetricSet label="PageSpeed" result={data.devices[device].psi} /><MetricSet label="CrUX" result={data.devices[device].crux} /></div></Card>)}</div>; }
-function MetricSet({ label, result }: { label: string; result: { status: string; metrics: Record<string, number | null>; message?: string } }) { return <div><span className="audit-muted">{label} · {result.status}</span>{result.status === "live" ? Object.entries(result.metrics).map(([key, value]) => { const numeric = value == null ? null : Number(value); return <div className="vital-row" key={key}><span>{key.toUpperCase()}</span><b>{numeric == null || !Number.isFinite(numeric) ? "No data" : key === "cls" ? numeric.toFixed(3) : `${Math.round(numeric)} ms`}</b></div>; }) : <small className="audit-muted">{result.message || "No data available"}</small>}</div>; }
-
-function Issues({ issues, compact = false }: { issues: AuditIssue[]; compact?: boolean }) { const [selected, setSelected] = useState<string | null>(null); return <Card className="issues-card"><CardHeader title={compact ? "Top issues" : "Issues detectados"} detail={issues.length ? "Evidencia, recomendación y alcance procedentes del crawler." : "La lista se completa solo con respuestas reales."} />{issues.length ? <div className="issue-list">{issues.map((issue) => <div className="issue-row" key={issue.id}><button onClick={() => setSelected(selected === issue.id ? null : issue.id)}><StatusPill tone={issue.severity === "Alta" ? "error" : issue.severity === "Media" ? "warning" : "neutral"}>{issue.severity}</StatusPill><span><strong>{issue.issue}</strong><small>{issue.evidence}</small></span><ChevronDown className={selected === issue.id ? "rotate" : ""} size={15} /></button>{selected === issue.id && <div className="issue-detail"><b>Recomendación</b><span>{issue.recommendation}</span><small>{issue.evidence}</small></div>}</div>)}</div> : <EmptyState title="No data available" detail="No se detectaron issues en las páginas auditadas." />}</Card>; }
-function Pages({ pages }: { pages: PageAudit[] }) { const columns: TableColumn<PageAudit>[] = [{ key: "url", label: "URL", sortValue: (row) => row.url, filter: "text", render: (row) => <span className="analytics-cell-label" title={row.url}>{row.url}</span> }, { key: "httpStatus", label: "HTTP", sortValue: (row) => row.httpStatus ?? -1, render: (row) => row.httpStatus == null ? "No data" : String(row.httpStatus) }, { key: "title", label: "Title", sortValue: (row) => row.title || "", filter: "text", render: (row) => row.title || "No data" }, { key: "h1", label: "H1", sortValue: (row) => row.h1.join(" · "), render: (row) => row.h1.join(" · ") || "No data" }, { key: "schema", label: "JSON-LD", sortValue: (row) => row.jsonLd, render: (row) => row.jsonLd ? String(row.jsonLd) : "No data" }]; return <Card><CardHeader title="Páginas auditadas" detail="Solo URLs que respondió el crawler propio." /><DataTable columns={columns} rows={pages} label="páginas" rowKey={(row) => row.url} /></Card>; }
-function Performance({ data, device, psi }: { data: AuditData; device: AuditDevice; psi: PsiResult }) { return <><div className="device-switch"><StatusPill tone="neutral">{device}</StatusPill><span>{data.siteUrl}</span></div><Card><CardHeader title={`PageSpeed · ${device}`} detail="Fuente: PageSpeed Insights / Lighthouse." />{psi.status === "live" ? <div className="score-grid">{Object.entries(psi.scores).map(([label, value]) => <div key={label}><span>{label}</span><strong>{value == null ? "No data" : value}</strong><Progress value={value ?? 0} /></div>)}</div> : <EmptyState title="Unavailable" detail={psi.message || "PageSpeed no devolvió datos."} />}</Card><Card><CardHeader title="Oportunidades y diagnósticos" />{psi.opportunities.length ? <div className="opportunity-list">{psi.opportunities.map((item, index) => <div key={`${item.title}-${index}`}><b>{item.title}</b><span>{item.displayValue || "No data"}</span></div>)}</div> : <EmptyState title="No data available" detail="No se recibieron oportunidades de Lighthouse." />}</Card></>; }
-function History({ history }: { history: AuditData["history"] }) { if (history === "no_data" || !history.length) return <Card><CardHeader title="Historial de auditorías" /><EmptyState title="No data available" detail="No hay ejecuciones persistidas en audit_runs." /></Card>; return <Card><CardHeader title="Historial de auditorías" detail="Ejecuciones leídas desde audit_runs." /><div className="history-list">{(history as AuditHistory[]).map((run) => <div key={run.id}><Clock3 size={16} /><span><b>{run.snapshotKey}</b><small>{date(run.completedAt)}</small></span><StatusPill tone={run.status === "success" ? "success" : "error"}>{run.status}</StatusPill></div>)}</div></Card>; }
-function Configuration({ data }: { data: AuditData }) { return <><div className="source-status">{(["crawler", "psi", "crux", "gsc"] as const).map((source) => <div className="source-card" key={source}><span><b>{source === "psi" ? "PageSpeed Insights" : source === "crux" ? "CrUX" : source === "gsc" ? "Search Console" : "Crawler propio"}</b><small>Estado de la fuente en el snapshot</small></span><StatusPill tone={data.sources[source] === "live" ? "success" : data.sources[source] === "partial" ? "warning" : "neutral"}>{data.sources[source]}</StatusPill></div>)}</div><Card><CardHeader title="Configuración" action={<Settings2 size={17} />} /><div className="audit-stat-list"><span>Sitio<strong>{data.siteUrl}</strong></span><span>Sitemap<strong>{data.sitemap.status}</strong></span><span>Robots.txt<strong>{data.crawler.robots}</strong></span><span>Limitación<strong>{data.crawler.message || "No data"}</strong></span></div></Card></>; }
+function Experience({ reports, runId }: { reports: BrowserReport[]; runId?: number }) {
+  const evidenceUrl = (report: BrowserReport, name: string) => `/api/audit/runs/${runId}/evidence?report=${encodeURIComponent(report.id)}&name=${encodeURIComponent(name)}`;
+  return <Card>
+    <CardHeader title="Auditoría renderizada y experiencia" detail="Playwright + axe-core; la cobertura automática no certifica WCAG ni conversiones." />
+    <p>Ejecutar en local o CI: <code>npm run audit:browser -- --run={runId || "ID"}</code></p>
+    {!reports.length && <EmptyState title="Sin escenarios ejecutados" detail="El runner guarda resultados y capturas en esta corrida. Las trazas se conservan como artefactos del runner." />}
+    {reports.map((report) => <section key={report.id}>
+      <h3>{date(report.createdAt)} · criterios {report.criteriaVersion}</h3>
+      <p>{report.scenarios.filter((item) => item.status === "completed").length}/{report.scenarios.length} escenarios completados · {report.findings.length} hallazgos</p>
+      <p>{report.summary.journeys.passed}/{report.summary.journeys.evaluated} pasos de recorrido verificados · {report.summary.automaticFailures} fallos automáticos · {report.summary.reviewFindings} observaciones para revisión</p>
+      <details><summary>Escenarios y criterios evaluados</summary>{report.scenarios.map((scenario) => <div className="crawl-evidence" key={scenario.id}><b>{scenario.language} · {scenario.template} · {scenario.viewport} · {scenario.status}</b><p>{scenario.url}</p>{scenario.screenshot && report.persistedArtifacts?.includes(scenario.screenshot) && <a href={evidenceUrl(report, scenario.screenshot)} target="_blank" rel="noreferrer">Ver captura</a>}{scenario.checks.map((check, index) => <p key={`${check.criterion}-${index}`}>{check.criterion}: {check.status} · {check.evidence}</p>)}</div>)}</details>
+      {report.findings.map((finding, index) => <details className="crawl-issue" key={`${finding.scenario}-${finding.criterion}-${index}`}>
+        <summary>{finding.severity} · {finding.title} · {finding.evaluation === "review" ? "revisión humana" : "automático"}</summary>
+        <p>{finding.url} · {finding.viewport} · confianza {finding.confidence}</p><p>{finding.evidence}</p><p>{finding.recommendation}</p>
+        {finding.artifact && (report.persistedArtifacts?.includes(finding.artifact) ? <a href={evidenceUrl(report, finding.artifact)} target="_blank" rel="noreferrer">Ver evidencia: {finding.artifact}</a> : <code>{finding.artifact}</code>)}
+      </details>)}
+    </section>)}
+  </Card>;
+}

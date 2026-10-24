@@ -1,0 +1,50 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - img "whalemate" [ref=e5]
+    - generic [ref=e6]:
+      - generic [ref=e7]: W
+      - generic [ref=e8]:
+        - text: Whalemate
+        - generic [ref=e9]: Fuentes reales
+    - navigation "Navegación principal" [ref=e12]:
+      - link "Resumen" [ref=e13] [cursor=pointer]:
+        - /url: /
+      - link "Search Console" [ref=e20] [cursor=pointer]:
+        - /url: /search-console
+      - link "Analytics" [ref=e25] [cursor=pointer]:
+        - /url: /analytics
+      - link "Auditoría técnica" [ref=e29] [cursor=pointer]:
+        - /url: /auditoria-tecnica
+      - link "Keywords" [ref=e34] [cursor=pointer]:
+        - /url: /keywords
+      - link "Contenido" [ref=e40] [cursor=pointer]:
+        - /url: /contenido
+      - link "Alertas" [ref=e45] [cursor=pointer]:
+        - /url: /alertas
+      - link "Configuración" [ref=e50] [cursor=pointer]:
+        - /url: /configuracion
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - text: Fuentes conectadas
+        - generic [ref=e58]: Datos reales, sin mocks
+      - button "WM Whalemate SEO Team" [ref=e59] [cursor=pointer]:
+        - generic [ref=e60]: WM
+        - generic [ref=e61]:
+          - text: Whalemate
+          - generic [ref=e62]: SEO Team
+  - main [ref=e65]:
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - img "whalemate" [ref=e68]
+        - generic [ref=e69]: SEO Control Center
+        - generic [ref=e70]: /
+        - strong [ref=e71]: Resumen
+      - generic [ref=e72]:
+        - generic [ref=e73]: Fuentes reales
+        - button "Buscar" [ref=e75] [cursor=pointer]
+        - button "Notificaciones" [ref=e79] [cursor=pointer]:
+          - generic [ref=e83]: "3"
+        - generic [ref=e84]: WM
+    - generic [ref=e86]:
+      - strong [ref=e89]: Cargando datos
+      - generic [ref=e90]: Consultando la fuente seleccionada.

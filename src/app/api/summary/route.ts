@@ -4,6 +4,7 @@ import { dates, parseFilters, type AnalyticsData, type SearchConsoleData } from 
 import { databaseConfigured, snapshotState } from "@/lib/snapshot-refresh";
 import { startOpportunisticIngest } from "@/lib/ingest";
 import { SITE_URL } from "@/lib/site";
+import type { AuditData } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -29,10 +30,8 @@ export async function GET(request: Request) {
   const unavailable = !search && !analytics;
   const queryRows = search?.queries ?? [];
   const inspection = indexation?.snapshot && typeof indexation.snapshot === "object" ? ((indexation.snapshot as { inspection?: { rows?: Array<{ url?: string; status?: string; error?: string }> } }).inspection ?? null) : null;
-  const auditSnapshot = audit?.snapshot && typeof audit.snapshot === "object" ? audit.snapshot as { crawler?: { audited?: unknown[]; issues?: unknown[] }; devices?: Record<string, { psi?: { scores?: Record<string, number | null>; metrics?: Record<string, number | null>; status?: string }; crux?: { metrics?: Record<string, number | null>; status?: string } }> } : null;
-  const auditPages = auditSnapshot?.crawler?.audited?.length ?? 0;
   const auditIssueTotal = auditIssues.reduce((total, item) => total + item.count, 0);
-  const auditScore = auditPages ? Math.max(0, Math.round(100 - auditIssueTotal / auditPages * 10)) : null;
+  const auditScore = (audit?.snapshot as AuditData | undefined)?.report?.score ?? null;
   const rankings = (rankingRows.length ? rankingRows : queryRows.map((row) => ({ query: row.query, position: row.position ?? null, previousPosition: null, impressions: row.impressions ?? null }))).map((row) => ({ query: row.query, position: row.position == null ? null : Number(row.position), previousPosition: row.previousPosition == null ? null : Number(row.previousPosition), impressions: row.impressions == null ? null : Number(row.impressions) }));
   const withPosition = rankings.filter((row) => row.position != null && Number.isFinite(row.position));
   const positionCount = (max: number) => withPosition.filter((row) => (row.position as number) <= max).length;

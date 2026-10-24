@@ -1,0 +1,190 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - complementary [ref=f1e3]:
+      - img "whalemate" [ref=f1e5]
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7]: W
+        - generic [ref=f1e8]:
+          - text: Whalemate
+          - generic [ref=f1e9]: Fuentes reales
+      - navigation "Navegación principal" [ref=f1e12]:
+        - link "Resumen" [ref=f1e13] [cursor=pointer]:
+          - /url: /
+        - link "Search Console" [ref=f1e20] [cursor=pointer]:
+          - /url: /search-console
+        - link "Analytics" [ref=f1e25] [cursor=pointer]:
+          - /url: /analytics
+        - link "Auditoría técnica" [ref=f1e29] [cursor=pointer]:
+          - /url: /auditoria-tecnica
+        - link "Keywords" [ref=f1e34] [cursor=pointer]:
+          - /url: /keywords
+        - link "Contenido" [ref=f1e40] [cursor=pointer]:
+          - /url: /contenido
+        - link "Alertas" [ref=f1e45] [cursor=pointer]:
+          - /url: /alertas
+        - link "Configuración" [ref=f1e50] [cursor=pointer]:
+          - /url: /configuracion
+      - generic [ref=f1e55]:
+        - generic [ref=f1e56]:
+          - text: Fuentes conectadas
+          - generic [ref=f1e58]: Datos reales, sin mocks
+        - button "WM Whalemate SEO Team" [ref=f1e59] [cursor=pointer]:
+          - generic [ref=f1e60]: WM
+          - generic [ref=f1e61]:
+            - text: Whalemate
+            - generic [ref=f1e62]: SEO Team
+    - main [ref=f1e65]:
+      - generic [ref=f1e66]:
+        - generic [ref=f1e67]:
+          - img "whalemate" [ref=f1e68]
+          - generic [ref=f1e69]: SEO Control Center
+          - generic [ref=f1e70]: /
+          - strong [ref=f1e71]: Auditoría técnica
+        - generic [ref=f1e72]:
+          - generic [ref=f1e73]: Fuentes reales
+          - button "Buscar" [ref=f1e75] [cursor=pointer]
+          - button "Notificaciones" [ref=f1e79] [cursor=pointer]:
+            - generic [ref=f1e83]: "3"
+          - generic [ref=f1e84]: WM
+      - generic [ref=f1e86]:
+        - generic [ref=f1e87]:
+          - generic [ref=f1e88]:
+            - heading "Auditoría Web" [level=1] [ref=f1e89]
+            - paragraph [ref=f1e90]: www.whalemate.com · 24/10/2026, 19:11:56
+            - text: SEO técnico y experiencia renderizada
+          - generic [ref=f1e91]:
+            - button "Auditar sitio" [disabled] [ref=f1e92]
+            - button "Actualizar" [disabled] [ref=f1e98]
+        - generic [ref=f1e113]:
+          - generic [ref=f1e115]:
+            - 'heading "Corrida #12 · queued" [level=2] [ref=f1e298]'
+            - paragraph [ref=f1e117]: 0 procesadas · 422 pendientes · 0 bloqueadas · 0 fallidas · 0 excluidas
+          - progressbar "Progreso del crawl" [ref=f1e118]
+          - paragraph [ref=f1e119]: 0 procesadas; 422 pendientes; 0 excluidas.
+          - generic [ref=f1e299]:
+            - button "Pausar al terminar el lote" [ref=f1e300] [cursor=pointer]
+            - button "Reanudar" [disabled] [ref=f1e304]
+            - button "Cancelar" [ref=f1e307] [cursor=pointer]
+        - navigation "Secciones de auditoría" [ref=f1e99]:
+          - button "Resumen" [ref=f1e100] [cursor=pointer]
+          - button "Issues" [ref=f1e101] [cursor=pointer]
+          - button "Páginas" [ref=f1e102] [cursor=pointer]
+          - button "Experiencia" [ref=f1e103] [cursor=pointer]
+          - button "Rendimiento" [ref=f1e104] [cursor=pointer]
+          - button "Historial" [ref=f1e105] [cursor=pointer]
+          - button "Configuración" [ref=f1e106] [cursor=pointer]
+        - generic [ref=f1e120]:
+          - generic [ref=f1e121]:
+            - generic [ref=f1e122]: Salud técnica interna
+            - strong [ref=f1e123]: Sin datos
+            - generic [ref=f1e124]: "Provisional: revisar cobertura"
+          - generic [ref=f1e125]:
+            - generic [ref=f1e126]: Cobertura HTML
+            - strong [ref=f1e127]: 0%
+            - generic [ref=f1e128]: 0 HTML · 0 procesadas
+          - generic [ref=f1e129]:
+            - generic [ref=f1e130]: Problemas
+            - strong [ref=f1e131]: "0"
+            - generic [ref=f1e132]: 0 incidencias · 0 páginas
+          - generic [ref=f1e133]:
+            - generic [ref=f1e134]: Indexabilidad HTML
+            - strong [ref=f1e135]: Sin datos
+            - generic [ref=f1e136]: No equivale a indexación en Google
+        - generic [ref=f1e137]:
+          - generic [ref=f1e138]:
+            - generic [ref=f1e139]: Rastreo
+            - strong [ref=f1e140]: Sin datos
+            - generic [ref=f1e141]: 0 evaluaciones
+          - generic [ref=f1e142]:
+            - generic [ref=f1e143]: Indexabilidad
+            - strong [ref=f1e144]: Sin datos
+            - generic [ref=f1e145]: 0 evaluaciones
+          - generic [ref=f1e146]:
+            - generic [ref=f1e147]: Enlaces
+            - strong [ref=f1e148]: Sin datos
+            - generic [ref=f1e149]: 0 evaluaciones
+          - generic [ref=f1e150]:
+            - generic [ref=f1e151]: Metadatos
+            - strong [ref=f1e152]: Sin datos
+            - generic [ref=f1e153]: 0 evaluaciones
+          - generic [ref=f1e154]:
+            - generic [ref=f1e155]: Contenido
+            - strong [ref=f1e156]: Sin datos
+            - generic [ref=f1e157]: 0 evaluaciones
+          - generic [ref=f1e158]:
+            - generic [ref=f1e159]: Accesibilidad
+            - strong [ref=f1e160]: Sin datos
+            - generic [ref=f1e161]: 0 evaluaciones
+          - generic [ref=f1e162]:
+            - generic [ref=f1e163]: Datos estructurados
+            - strong [ref=f1e164]: Sin datos
+            - generic [ref=f1e165]: 0 evaluaciones
+          - generic [ref=f1e166]:
+            - generic [ref=f1e167]: Internacionalización
+            - strong [ref=f1e168]: Sin datos
+            - generic [ref=f1e169]: 0 evaluaciones
+        - generic [ref=f1e170]:
+          - generic [ref=f1e171]:
+            - heading "Contenido principal" [level=2] [ref=f1e174]
+            - paragraph [ref=f1e175]: 0 palabras extraídas
+            - paragraph [ref=f1e176]: 0/0 páginas con bloques JSON-LD
+            - text: JSON válido no garantiza resultados enriquecidos.
+          - generic [ref=f1e177]:
+            - heading "Respuesta observada" [level=2] [ref=f1e180]
+            - paragraph [ref=f1e181]: Sin datos
+            - text: Tiempo de descarga; no es un Core Web Vital.
+          - generic [ref=f1e182]:
+            - heading "Profundidad desde la home" [level=2] [ref=f1e185]
+            - paragraph [ref=f1e186]: 0 páginas alcanzadas
+            - paragraph [ref=f1e187]: 0 sin camino detectado
+            - text: Las posibles huérfanas requieren cobertura completa y revisión.
+        - generic [ref=f1e188]:
+          - generic [ref=f1e190]:
+            - heading "Comparación con la auditoría anterior" [level=2] [ref=f1e191]
+            - paragraph [ref=f1e192]: Solo se marcan resueltos los criterios reevaluados.
+          - generic [ref=f1e193]:
+            - generic [ref=f1e194]:
+              - text: Nuevas
+              - strong [ref=f1e195]: "0"
+            - generic [ref=f1e196]:
+              - text: Persistentes
+              - strong [ref=f1e197]: "0"
+            - generic [ref=f1e198]:
+              - text: Resueltas
+              - strong [ref=f1e199]: "0"
+            - generic [ref=f1e200]:
+              - text: Sin reevaluar
+              - strong [ref=f1e201]: "219"
+        - region "PageSpeed y Core Web Vitals" [ref=f1e202]:
+          - heading "PageSpeed y Core Web Vitals" [level=2] [ref=f1e203]
+          - generic [ref=f1e204]:
+            - generic [ref=f1e205]:
+              - generic [ref=f1e207]:
+                - heading "PageSpeed · Mobile" [level=2] [ref=f1e208]
+                - paragraph [ref=f1e209]: Lighthouse · laboratorio · Todavía sin consultar
+              - generic [ref=f1e310]:
+                - strong [ref=f1e313]: Test de PageSpeed pendiente
+                - generic [ref=f1e314]: Ejecutar enriquecimiento de rendimiento.
+            - generic [ref=f1e241]:
+              - generic [ref=f1e243]:
+                - heading "PageSpeed · Desktop" [level=2] [ref=f1e244]
+                - paragraph [ref=f1e245]: Lighthouse · laboratorio · Todavía sin consultar
+              - generic [ref=f1e315]:
+                - strong [ref=f1e318]: Test de PageSpeed pendiente
+                - generic [ref=f1e319]: Ejecutar enriquecimiento de rendimiento.
+          - generic [ref=f1e277]:
+            - generic [ref=f1e278]:
+              - generic [ref=f1e280]:
+                - heading "Core Web Vitals · Mobile" [level=2] [ref=f1e281]
+                - paragraph [ref=f1e282]: CrUX · usuarios reales · p75 · https://www.whalemate.com
+              - generic [ref=f1e283]:
+                - strong [ref=f1e286]: Consulta de CrUX pendiente
+                - generic [ref=f1e287]: Ejecutar enriquecimiento de rendimiento.
+            - generic [ref=f1e288]:
+              - generic [ref=f1e290]:
+                - heading "Core Web Vitals · Desktop" [level=2] [ref=f1e291]
+                - paragraph [ref=f1e292]: CrUX · usuarios reales · p75 · https://www.whalemate.com
+              - generic [ref=f1e293]:
+                - strong [ref=f1e296]: Consulta de CrUX pendiente
+                - generic [ref=f1e297]: Ejecutar enriquecimiento de rendimiento.
+  - alert [ref=f1e112]

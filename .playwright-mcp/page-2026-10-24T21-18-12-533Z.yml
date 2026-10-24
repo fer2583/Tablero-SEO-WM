@@ -1,0 +1,269 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - link "Sello ISO 27001 Certified de A-LIGN Novedad Whalemate está certificado ISO/IEC 27001:2022" [ref=f1e5] [cursor=pointer]:
+        - /url: /seguridad/
+        - generic [ref=f1e6]:
+          - img "Sello ISO 27001 Certified de A-LIGN" [ref=f1e7]
+          - generic [ref=f1e8]: Novedad
+          - generic [ref=f1e9]: Whalemate está certificado ISO/IEC 27001:2022
+      - banner [ref=f1e14]:
+        - navigation [ref=f1e15]:
+          - generic [ref=f1e16]:
+            - link "Whalemate" [ref=f1e17] [cursor=pointer]:
+              - /url: /
+              - img "Whalemate" [ref=f1e18]
+            - generic [ref=f1e19]:
+              - button "Search" [ref=f1e20] [cursor=pointer]
+              - button "Menu" [ref=f1e26] [cursor=pointer]
+    - main [ref=f1e34]:
+      - generic [ref=f1e36]:
+        - generic [ref=f1e39]:
+          - generic [ref=f1e41]:
+            - heading "Hablemos de tu programa de riesgo humano" [level=1] [ref=f1e42]
+            - paragraph [ref=f1e43]: Contanos el tamaño de tu padrón y qué necesitás resolver. Te respondemos con una lectura de tu caso, no con un brochure.
+            - generic [ref=f1e44]:
+              - region [ref=f1e45]:
+                - heading "Quién está del otro lado" [level=2] [ref=f1e46]
+                - list [ref=f1e47]:
+                  - listitem [ref=f1e48]:
+                    - strong [ref=f1e49]: Mateo Bovio
+                    - generic [ref=f1e50]: CEO & Co-founder
+                  - listitem [ref=f1e51]:
+                    - strong [ref=f1e52]: Laura Sotelo
+                    - generic [ref=f1e53]: Head of CX
+                  - listitem [ref=f1e54]:
+                    - strong [ref=f1e55]: Alejandro Sanchez
+                    - generic [ref=f1e56]: Head of Operations
+                - paragraph [ref=f1e57]: Un equipo de producto que opera programas en LATAM, no una central de ventas tercerizada.
+              - region [ref=f1e58]:
+                - heading "Ya operan su programa con Whalemate" [level=2] [ref=f1e59]
+                - list [ref=f1e60]:
+                  - listitem [ref=f1e61]:
+                    - img "Naranja X" [ref=f1e62]
+                  - listitem [ref=f1e63]:
+                    - img "Frávega" [ref=f1e64]
+                  - listitem [ref=f1e65]:
+                    - img "Sancor Seguros" [ref=f1e66]
+                  - listitem [ref=f1e67]:
+                    - img "Farmacity" [ref=f1e68]
+              - figure "Banco del Sol Javier Tepedino CISO, Banco del Sol" [ref=f1e69]:
+                - blockquote [ref=f1e70]: “Whalemate nos da la cercanía local que necesitamos para que la ciberseguridad sea parte de la cultura diaria de nuestros usuarios.”
+                - generic [ref=f1e71]:
+                  - img "Banco del Sol" [ref=f1e72]
+                  - generic [ref=f1e73]:
+                    - strong [ref=f1e74]: Javier Tepedino
+                    - generic [ref=f1e75]: CISO, Banco del Sol
+          - generic [ref=f1e77]:
+            - heading "Contanos de tu organización" [level=2] [ref=f1e78]
+            - paragraph [ref=f1e79]: Cuanto más contexto nos dejes, más concreta es la primera respuesta.
+            - generic [ref=f1e80]:
+              - radiogroup [ref=f1e81]:
+                - paragraph [ref=f1e82]: ¿Tenés medido el riesgo humano en tu organización?
+                - generic [ref=f1e83]:
+                  - generic [ref=f1e84] [cursor=pointer]:
+                    - radio "Sí" [ref=f1e85]
+                    - generic [ref=f1e86]: Sí
+                  - generic [ref=f1e87] [cursor=pointer]:
+                    - radio "No" [ref=f1e88]
+                    - generic [ref=f1e89]: "No"
+              - generic [ref=f1e90]:
+                - generic [ref=f1e91] [cursor=pointer]: Nombre completo
+                - textbox "Nombre completo" [ref=f1e92]:
+                  - /placeholder: Juana Pérez
+              - generic [ref=f1e93]:
+                - generic [ref=f1e94] [cursor=pointer]: Email corporativo
+                - textbox "Email corporativo" [ref=f1e95]:
+                  - /placeholder: juana@empresa.com
+              - generic [ref=f1e96]:
+                - generic [ref=f1e97] [cursor=pointer]: Empresa
+                - textbox "Empresa" [ref=f1e98]:
+                  - /placeholder: Nombre de tu organización
+              - generic [ref=f1e99]:
+                - generic [ref=f1e100] [cursor=pointer]:
+                  - text: WhatsApp
+                  - generic [ref=f1e101]: · opcional
+                - textbox "WhatsApp · opcional" [ref=f1e102]:
+                  - /placeholder: +54 9 11 5555 5555
+              - generic [ref=f1e103]:
+                - generic [ref=f1e104] [cursor=pointer]:
+                  - text: ¿Cómo nos conociste?
+                  - generic [ref=f1e105]: · opcional
+                - combobox "¿Cómo nos conociste? · opcional" [ref=f1e106] [cursor=pointer]:
+                  - option "Elegí una opción" [selected]
+                  - option "Búsqueda en Google"
+                  - option "ChatGPT u otra IA"
+                  - option "LinkedIn"
+                  - option "Otra red social"
+                  - option "Recomendación de un colega"
+                  - option "Evento o webinar"
+                  - option "Partner o revendedor"
+                  - option "Otro"
+              - textbox [aria-hidden]
+              - button "Enviar" [ref=f1e107] [cursor=pointer]
+              - paragraph [ref=f1e108]: "Sin compromiso: si Whalemate no encaja con lo que buscás, te lo decimos."
+              - paragraph [ref=f1e109]: Los campos sin «opcional» son obligatorios.
+        - generic [ref=f1e111]:
+          - generic [ref=f1e112]: Contacto
+          - heading "Una conversación comercial sobre tu programa, no un recorrido de producto" [level=2] [ref=f1e114]
+          - paragraph [ref=f1e116]: "Escribí acá si estás evaluando Whalemate para tu organización: alcance, padrón, integraciones y qué tiene que mostrar el programa cuando pregunten dirección o auditoría."
+          - generic [ref=f1e117]:
+            - generic [ref=f1e119]:
+              - generic [aria-hidden] [ref=f1e122]: "01"
+              - paragraph [ref=f1e123]: "Alcance y padrón: cuántas personas entran, en qué países, con qué idiomas y qué canales se simulan. El padrón cambia el diseño del programa y también el número, así que es la primera pregunta que vas a recibir. Si ya tenés un proveedor y estás comparando, decilo en el mensaje: la conversación arranca en lo que hoy te falta, no en una lista de features que ya viste en otro sitio."
+            - generic [ref=f1e125]:
+              - generic [aria-hidden] [ref=f1e133]: "02"
+              - paragraph [ref=f1e134]: "Compras y seguridad: el Trust Center y el DPA están publicados para que tu equipo los revise antes de hablar con nosotros. ISO/IEC 27001:2022 está. SOC 2 no. Sin agente en el endpoint. Si tu pliego pide un sello que no tenemos, lo vas a saber en el primer intercambio y no tres reuniones después, cuando ya gastaste el trimestre."
+            - generic [ref=f1e136]:
+              - generic [aria-hidden] [ref=f1e139]: "03"
+              - paragraph [ref=f1e140]: "Precio y propuesta: no publicamos una lista de precios porque el alcance manda. La propuesta se arma con padrón, nivel de servicio y plazo, y va por escrito. Lo que sí se puede adelantar en el primer correo es qué define el número y en qué orden de magnitud se mueve, para que no pierdas un ciclo de compra averiguándolo."
+        - generic [ref=f1e142]:
+          - generic [ref=f1e143]: Motivos
+          - heading "Tres conversaciones que empiezan acá" [level=2] [ref=f1e145]
+          - paragraph [ref=f1e147]: No hace falta tener el proyecto cerrado para escribir. Estas son las tres que más llegan.
+          - generic [ref=f1e148]:
+            - generic [ref=f1e150]:
+              - heading "Estás armando el programa" [level=3] [ref=f1e153]
+              - paragraph [ref=f1e154]: No hay nada montado más allá del curso anual. Se define qué medir primero, cómo calibrar las simulaciones y qué evidencia deja el programa.
+            - generic [ref=f1e156]:
+              - heading "Estás comparando proveedores" [level=3] [ref=f1e164]
+              - paragraph [ref=f1e165]: "Ya tenés uno y algo no cierra: idiomas, soporte en LATAM, analítica pobre o un contrato que vence. Se compara contra lo que te falta, no contra un cuadro."
+            - generic [ref=f1e167]:
+              - heading "Tenés una auditoría encima" [level=3] [ref=f1e170]
+              - paragraph [ref=f1e171]: Un pliego, una certificación o un requisito de cliente con fecha. Se revisa qué exige el marco y qué puede mostrar el programa en ese plazo.
+        - generic [ref=f1e173]:
+          - generic [ref=f1e174]:
+            - generic [ref=f1e175]: Cómo funciona
+            - heading "Qué pasa después de enviar" [level=2] [ref=f1e178]
+          - generic [ref=f1e179]:
+            - generic [ref=f1e181]:
+              - generic [ref=f1e188]: Lectura
+              - paragraph [ref=f1e189]: "Un especialista comercial lee el mensaje con tu contexto: tamaño del padrón, industria y qué disparó la búsqueda."
+            - generic [ref=f1e191]:
+              - generic [ref=f1e197]: Primera respuesta
+              - paragraph [ref=f1e198]: Llega por correo, con una lectura de tu caso y las preguntas que faltan para dimensionarlo. No es una secuencia automática.
+            - generic [ref=f1e200]:
+              - generic [ref=f1e202]: Conversación
+              - paragraph [ref=f1e203]: Si hay fit, se coordina una reunión sobre tu operación. Si no lo hay, se dice en ese mismo correo.
+        - generic [ref=f1e205]:
+          - heading "Preguntas antes de escribir" [level=2] [ref=f1e207]
+          - generic [ref=f1e208]:
+            - group [ref=f1e210]:
+              - generic "¿Tengo que tener el presupuesto aprobado para escribir?" [ref=f1e211] [cursor=pointer]
+              - generic [ref=f1e214]: "No. Buena parte de los mensajes llegan en evaluación, sin número aprobado. Decir en qué punto estás ayuda: no es lo mismo dimensionar para el año que vas a presupuestar que resolver algo que vence este trimestre."
+            - group [ref=f1e218]:
+              - generic "¿Me van a mandar una secuencia de correos automáticos?" [ref=f1e219] [cursor=pointer]
+            - group [ref=f1e228]:
+              - generic "¿Puedo pedir precios en el formulario?" [ref=f1e229] [cursor=pointer]
+    - contentinfo [ref=f1e233]:
+      - generic [ref=f1e234]:
+        - generic [ref=f1e235]:
+          - generic [ref=f1e236]:
+            - link "Whalemate":
+              - /url: /
+              - img "Whalemate"
+            - paragraph [ref=f1e237]: Plataforma agentic de gestión de riesgo humano en ciberseguridad.
+          - generic [ref=f1e238]:
+            - paragraph [ref=f1e239]: Plataforma
+            - list [ref=f1e240]:
+              - listitem [ref=f1e241]:
+                - link "Simulaciones avanzadas" [ref=f1e242] [cursor=pointer]:
+                  - /url: /plataforma/simulaciones-avanzadas/
+              - listitem [ref=f1e243]:
+                - link "Entrenamiento adaptativo" [ref=f1e244] [cursor=pointer]:
+                  - /url: /plataforma/entrenamiento-adaptativo/
+              - listitem [ref=f1e245]:
+                - link "Analítica de riesgo humano" [ref=f1e246] [cursor=pointer]:
+                  - /url: /plataforma/analitica-de-riesgo-humano/
+              - listitem [ref=f1e247]:
+                - link "Agente de concientización" [ref=f1e248] [cursor=pointer]:
+                  - /url: /plataforma/agente-de-concientizacion/
+              - listitem [ref=f1e249]:
+                - link "Integraciones" [ref=f1e250] [cursor=pointer]:
+                  - /url: /plataforma/integraciones/
+          - generic [ref=f1e251]:
+            - paragraph [ref=f1e252]: Recursos
+            - list [ref=f1e253]:
+              - listitem [ref=f1e254]:
+                - link "Podcast Capa8" [ref=f1e255] [cursor=pointer]:
+                  - /url: /recursos/podcast/
+              - listitem [ref=f1e256]:
+                - link "Blog" [ref=f1e257] [cursor=pointer]:
+                  - /url: /recursos/blog/
+              - listitem [ref=f1e258]:
+                - link "Casos de éxito" [ref=f1e259] [cursor=pointer]:
+                  - /url: /recursos/caso-de-exito/
+              - listitem [ref=f1e260]:
+                - link "Compliance" [ref=f1e261] [cursor=pointer]:
+                  - /url: /caso-de-uso/compliance/
+              - listitem [ref=f1e262]:
+                - link "Glosario HRM" [ref=f1e263] [cursor=pointer]:
+                  - /url: /recursos/glosario-hrm/
+              - listitem [ref=f1e264]:
+                - link "Ejemplos de phishing" [ref=f1e265] [cursor=pointer]:
+                  - /url: /recursos/ejemplos-de-phishing/
+              - listitem [ref=f1e266]:
+                - link "Alternativas" [ref=f1e267] [cursor=pointer]:
+                  - /url: /alternativas/
+          - generic [ref=f1e268]:
+            - paragraph [ref=f1e269]: Nosotros
+            - list [ref=f1e270]:
+              - listitem [ref=f1e271]:
+                - link "Planes" [ref=f1e272] [cursor=pointer]:
+                  - /url: /planes/
+              - listitem [ref=f1e273]:
+                - link "El equipo" [ref=f1e274] [cursor=pointer]:
+                  - /url: /nosotros/#team
+              - listitem [ref=f1e275]:
+                - link "Soluciones" [ref=f1e276] [cursor=pointer]:
+                  - /url: /soluciones/
+              - listitem [ref=f1e277]:
+                - link "Alternativas" [ref=f1e278] [cursor=pointer]:
+                  - /url: /alternativas/
+              - listitem [ref=f1e279]:
+                - link "Trust Center" [ref=f1e280] [cursor=pointer]:
+                  - /url: /seguridad/
+          - generic [ref=f1e281]:
+            - paragraph [ref=f1e282]: Legal
+            - list [ref=f1e283]:
+              - listitem [ref=f1e284]:
+                - link "Privacidad" [ref=f1e285] [cursor=pointer]:
+                  - /url: /legal/privacidad/
+              - listitem [ref=f1e286]:
+                - link "Términos" [ref=f1e287] [cursor=pointer]:
+                  - /url: /legal/terminos/
+              - listitem [ref=f1e288]:
+                - link "Cookies" [ref=f1e289] [cursor=pointer]:
+                  - /url: /legal/cookies/
+              - listitem [ref=f1e290]:
+                - link "DPA" [ref=f1e291] [cursor=pointer]:
+                  - /url: /legal/dpa/
+              - listitem [ref=f1e292]:
+                - link "Asistente Fede" [ref=f1e293] [cursor=pointer]:
+                  - /url: /legal/asistente-fede/
+          - generic [ref=f1e294]:
+            - paragraph [ref=f1e295]: Contacto
+            - link "Escribinos" [ref=f1e296] [cursor=pointer]:
+              - /url: /contacto/
+            - generic [ref=f1e297]:
+              - link "LinkedIn" [ref=f1e298] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/whalemate/
+              - link "YouTube" [ref=f1e301] [cursor=pointer]:
+                - /url: https://www.youtube.com/@PodcastCapa8-ok
+              - link "Spotify" [ref=f1e304] [cursor=pointer]:
+                - /url: https://open.spotify.com/show/6sIX7GIN5NaKfbVFpuQhFg?si=466de4208d824d93
+        - generic [ref=f1e307]:
+          - generic [ref=f1e308]: © 2026 Whalemate. Todos los derechos reservados.
+          - button "Toggle theme" [ref=f1e309] [cursor=pointer]:
+            - generic [ref=f1e310]: Light mode
+  - generic:
+    - generic [ref=f1e318] [cursor=pointer]:
+      - button "Hablar con Fede" [ref=f1e323]
+      - button "Mensaje" [ref=f1e332]
+      - combobox "Cambiar idioma" [ref=f1e338]:
+        - img "ES flag" [ref=f1e339]
+    - generic:
+      - paragraph:
+        - text: Powered by
+        - link "ElevenAgents" [ref=f1e345] [cursor=pointer]:
+          - /url: https://elevenlabs.io/agents

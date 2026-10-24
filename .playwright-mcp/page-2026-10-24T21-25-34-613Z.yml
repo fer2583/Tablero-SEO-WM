@@ -1,0 +1,405 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]:
+    - generic [ref=f2e3]:
+      - link "Sello ISO 27001 Certified de A-LIGN Novedad Whalemate está certificado ISO/IEC 27001:2022 Ver Trust Center" [ref=f2e5] [cursor=pointer]:
+        - /url: /seguridad/
+        - generic [ref=f2e6]:
+          - img "Sello ISO 27001 Certified de A-LIGN" [ref=f2e7]
+          - generic [ref=f2e8]: Novedad
+          - generic [ref=f2e9]: Whalemate está certificado ISO/IEC 27001:2022
+          - generic [ref=f2e10]: Ver Trust Center
+      - banner [ref=f2e15]:
+        - navigation [ref=f2e16]:
+          - generic [ref=f2e17]:
+            - link "Whalemate" [ref=f2e18] [cursor=pointer]:
+              - /url: /
+              - img "Whalemate" [ref=f2e19]
+            - generic [ref=f2e20]:
+              - link "Plataforma" [ref=f2e22] [cursor=pointer]:
+                - /url: /plataforma-de-riesgo-humano/
+              - link "Servicios" [ref=f2e24] [cursor=pointer]:
+                - /url: /servicios/
+              - link "Partners" [ref=f2e25] [cursor=pointer]:
+                - /url: /partners/
+              - link "Recursos" [ref=f2e27] [cursor=pointer]:
+                - /url: /recursos/
+              - link "Nosotros" [ref=f2e28] [cursor=pointer]:
+                - /url: /nosotros/
+            - generic [ref=f2e29]:
+              - button "Search" [ref=f2e30] [cursor=pointer]
+              - button "Idioma" [ref=f2e37] [cursor=pointer]
+              - link "Agendar una demo" [ref=f2e69] [cursor=pointer]:
+                - /url: /contacto/
+    - main [ref=f2e70]:
+      - generic [ref=f2e71]:
+        - generic [ref=f2e72]:
+          - generic [ref=f2e75]:
+            - heading "Plataforma de gestión de riesgo humano Riesgo humano. Medido y gestionado." [level=1] [ref=f2e77]:
+              - generic [ref=f2e78]: Plataforma de gestión de riesgo humano
+              - generic [ref=f2e79]: Riesgo humano.Medido y gestionado.
+            - paragraph [ref=f2e81]:
+              - text: Whalemate es la plataforma de riesgo humano que simula phishing y QRishing y entrena por perfil.
+              - strong [ref=f2e82]: Un agente prioriza con el risk score, sin fines disciplinarios.
+            - generic [ref=f2e84]:
+              - link "Agendar una demo" [ref=f2e85] [cursor=pointer]:
+                - /url: /contacto/
+              - link "Ver la plataforma" [ref=f2e86] [cursor=pointer]:
+                - /url: /plataforma-de-riesgo-humano/
+          - generic [ref=f2e87]:
+            - paragraph [ref=f2e88]: Más de 250 empresas y 100.000 usuarios en 11 países de LATAM gestionan su riesgo humano con Whalemate
+            - generic [ref=f2e91]:
+              - img "Banco Unión S.A." [ref=f2e93]
+              - img "Sancor Seguros" [ref=f2e95]
+              - img "Arcor" [ref=f2e97]
+              - img "AySA" [ref=f2e99]
+              - img "Provincia NET" [ref=f2e101]
+              - img "Lipiandes" [ref=f2e103]
+              - img "Naranja X" [ref=f2e105]
+              - img "BPN" [ref=f2e107]
+              - img "PROSA" [ref=f2e109]
+              - img "Farmacity" [ref=f2e111]
+              - img "Frávega" [ref=f2e113]
+              - img "Medifé" [ref=f2e115]
+              - img "Newsan" [ref=f2e117]
+              - img "Banco del Chaco" [ref=f2e119]
+              - img "RappiPay Colombia" [ref=f2e121]
+        - generic [ref=f2e156]:
+          - generic [ref=f2e157]: El problema
+          - heading "Tu programa de concientización mide cursos terminados. No te dice quién va a caer." [level=2] [ref=f2e159]: Tu programa de concientización mide cursos terminados.No te dice quién va a caer.
+          - paragraph [ref=f2e161]:
+            - text: "Capacitar a todos por igual no baja el riesgo: los clics se concentran en pocas personas que hoy nadie identifica.Gestionar el riesgo humano es encontrar a esas personas,"
+            - strong [ref=f2e162]: intervenir a tiempo
+            - text: y medir si el comportamiento cambia de verdad. Eso hace Whalemate.
+          - link "Conocer la plataforma" [ref=f2e165] [cursor=pointer]:
+            - /url: /plataforma-de-riesgo-humano/#modules
+        - generic [ref=f2e171]:
+          - heading "Un ciclo continuo sobre cada persona, no un curso al año." [level=2] [ref=f2e174]: Un ciclo continuo sobre cada persona,no un curso al año.
+          - generic [ref=f2e175]:
+            - link [ref=f2e177] [cursor=pointer]:
+              - /url: /plataforma/simulaciones-avanzadas/
+              - heading "Simulaciones avanzadas" [level=3] [ref=f2e179]
+              - paragraph [ref=f2e180]: "Phishing y QRishing realistas, ajustados al rol y al historial de cada persona: clic, captura de credenciales o adjunto malicioso."
+              - generic [ref=f2e181]: Conocer más
+            - link [ref=f2e183] [cursor=pointer]:
+              - /url: /plataforma/entrenamiento-adaptativo/
+              - heading "Entrenamiento adaptativo" [level=3] [ref=f2e185]
+              - paragraph [ref=f2e186]: Quien cae recibe en minutos el microcurso que le corresponde, sin que nadie lo asigne a mano. Con rutas de aprendizaje y gamificación.
+              - generic [ref=f2e187]: Conocer más
+            - link [ref=f2e189] [cursor=pointer]:
+              - /url: /plataforma/analitica-de-riesgo-humano/
+              - heading "Analítica de riesgo humano" [level=3] [ref=f2e191]
+              - paragraph [ref=f2e192]: Risk score por persona, área y compañía, con evidencia exportable para auditoría y dirección.
+              - generic [ref=f2e193]: Conocer más
+          - 'link "Agente de concientización Decide la próxima intervención de cada persona: qué simulación, qué contenido, qué canal y qué dificultad. Conocer el Agente" [ref=f2e195] [cursor=pointer]':
+            - /url: /plataforma/agente-de-concientizacion/
+            - generic [ref=f2e197]:
+              - heading "Agente de concientización" [level=3] [ref=f2e198]
+              - paragraph [ref=f2e199]: "Decide la próxima intervención de cada persona: qué simulación, qué contenido, qué canal y qué dificultad."
+            - generic [ref=f2e200]: Conocer el Agente
+        - region "Amenazas habituales que cubre el programa" [ref=f2e201]:
+          - generic [ref=f2e205]:
+            - generic [ref=f2e206]:
+              - generic [ref=f2e207]: Phishing con facturas falsas
+              - generic [ref=f2e208]: QR adulterados en vía pública
+              - generic [ref=f2e209]: Deepfakes de voz a finanzas
+              - generic [ref=f2e210]: Vishing a mesas de ayuda
+              - generic [ref=f2e211]: Smishing de paquetería
+            - generic [aria-hidden] [ref=f2e212]:
+              - generic [ref=f2e213]: Phishing con facturas falsas
+              - generic [ref=f2e214]: QR adulterados en vía pública
+              - generic [ref=f2e215]: Deepfakes de voz a finanzas
+              - generic [ref=f2e216]: Vishing a mesas de ayuda
+              - generic [ref=f2e217]: Smishing de paquetería
+        - generic [ref=f2e219]:
+          - generic [ref=f2e220]: Qué cambia
+          - heading "Tu equipo de seguridad deja de armar campañas a mano" [level=2] [ref=f2e222]
+          - paragraph [ref=f2e224]: Un programa de concientización tradicional manda el mismo curso a todos una vez al año. Whalemate lo convierte en un programa continuo y medible, que operamos con vos.
+          - generic [ref=f2e225]:
+            - generic [ref=f2e227]:
+              - heading "Gestión de riesgo humano con Whalemate" [level=3] [ref=f2e230]
+              - list [ref=f2e231]:
+                - listitem [ref=f2e232]: Sabés quién concentra el riesgo, por persona, área y compañía
+                - listitem [ref=f2e233]: Quien cae recibe el refuerzo en minutos, no en la próxima campaña
+                - listitem [ref=f2e234]: Un analista asignado opera el plan anual y las campañas con tu equipo
+                - listitem [ref=f2e235]: Evidencia lista para auditoría y para el directorio
+            - generic [ref=f2e237]:
+              - heading "Concientización tradicional" [level=3] [ref=f2e240]
+              - list [ref=f2e241]:
+                - listitem [ref=f2e242]: El mismo curso para toda la nómina
+                - listitem [ref=f2e243]: Una campaña masiva una vez al año
+                - listitem [ref=f2e244]: Completion rate como único indicador
+                - listitem [ref=f2e245]: Seguridad armando campañas a mano
+        - generic [ref=f2e247]:
+          - generic [ref=f2e249]:
+            - generic [ref=f2e250]:
+              - generic [ref=f2e251]: +40%
+              - generic [ref=f2e252]:
+                - generic [ref=f2e253]: Engagement
+                - generic [ref=f2e254]: del programa
+            - generic [ref=f2e255]:
+              - generic [ref=f2e256]: ×2
+              - generic [ref=f2e257]:
+                - generic [ref=f2e258]: Adopción
+                - generic [ref=f2e259]: vs. el programa anterior
+          - paragraph [ref=f2e260]:
+            - text: Resultados de Banco del Sol al pasar de campañas anuales a un programa continuo con Whalemate.
+            - link "Ver el caso →" [ref=f2e261] [cursor=pointer]:
+              - /url: /recursos/casos-de-exito/banco-del-sol/
+        - generic [ref=f2e264]:
+          - generic [ref=f2e265]:
+            - generic [ref=f2e266]: CASO DE ÉXITO
+            - heading "NaranjaX pasó de capacitar a gestionar el riesgo" [level=2] [ref=f2e268]
+            - paragraph [ref=f2e270]: Con más de 3.000 colaboradores, NaranjaX dejó las campañas genéricas por un programa que mide la exposición de cada área, simula ataques realistas y define cuándo intervenir. Hoy su equipo de seguridad reporta riesgo real, no cursos terminados.
+            - link "Ver más casos de éxito" [ref=f2e273] [cursor=pointer]:
+              - /url: /recursos/caso-de-exito/
+          - generic [ref=f2e276]:
+            - img "NaranjaX — caso de éxito"
+        - generic [ref=f2e278]:
+          - generic [ref=f2e280]:
+            - generic [ref=f2e281]: Testimonios
+            - heading "Por qué nos recomiendan" [level=2] [ref=f2e284]
+          - generic [ref=f2e286]:
+            - article [ref=f2e287]:
+              - generic [ref=f2e288]:
+                - generic [aria-hidden] [ref=f2e289]: “
+                - paragraph [ref=f2e290]: Whalemate nos da la cercanía local que necesitamos para que la ciberseguridad sea parte de la cultura diaria de nuestros usuarios.
+              - img "Banco del Sol" [ref=f2e293]
+              - generic [ref=f2e294]:
+                - strong [ref=f2e295]: Javier Tepedino
+                - generic [ref=f2e296]: CISO, Banco del Sol
+            - article [ref=f2e297]:
+              - generic [ref=f2e298]:
+                - generic [aria-hidden] [ref=f2e299]: “
+                - paragraph [ref=f2e300]: Lo que nos permite Whalemate hoy es la personalización de las campañas adaptada a lo que necesita NaranjaX y a nuestro estado de madurez. Eso lo valoramos muchísimo.
+              - img "NaranjaX" [ref=f2e303]
+              - generic [ref=f2e304]:
+                - strong [ref=f2e305]: Martín Gutiérrez
+                - generic [ref=f2e306]: Especialista en Ciberseguridad, NaranjaX
+            - article [ref=f2e307]:
+              - generic [ref=f2e308]:
+                - generic [aria-hidden] [ref=f2e309]: “
+                - paragraph [ref=f2e310]: Generó más orden y cultura en materia de ciberseguridad, tomando con más seriedad los riesgos que implican la seguridad de la información.
+              - img "Knight Piesold S.A." [ref=f2e313]
+              - generic [ref=f2e314]:
+                - strong [ref=f2e315]: Andoni Sagardia Hidalgo
+                - generic [ref=f2e316]: IT Administrador, Knight Piesold S.A.
+            - article [ref=f2e317]:
+              - generic [ref=f2e318]:
+                - generic [aria-hidden] [ref=f2e319]: “
+                - paragraph [ref=f2e320]: Whalemate nos está ayudando a hacer nuestro ambiente corporativo mucho más seguro a través de su plataforma de concientización, y gracias a eso puedo justificar ante el Board, con indicadores, la necesidad de invertir en Seguridad de la Información.
+              - img "GDL Logística" [ref=f2e323]
+              - generic [ref=f2e324]:
+                - strong [ref=f2e325]: Everton Braz
+                - generic [ref=f2e326]: Seguridad de la Información, GDL Logística
+            - article [ref=f2e327]:
+              - generic [ref=f2e328]:
+                - generic [aria-hidden] [ref=f2e329]: “
+                - paragraph [ref=f2e330]: Whalemate nos da la cercanía local que necesitamos para que la ciberseguridad sea parte de la cultura diaria de nuestros usuarios.
+              - img "Banco del Sol" [ref=f2e333]
+              - generic [ref=f2e334]:
+                - strong [ref=f2e335]: Javier Tepedino
+                - generic [ref=f2e336]: CISO, Banco del Sol
+            - article [ref=f2e337]:
+              - generic [ref=f2e338]:
+                - generic [aria-hidden] [ref=f2e339]: “
+                - paragraph [ref=f2e340]: Lo que nos permite Whalemate hoy es la personalización de las campañas adaptada a lo que necesita NaranjaX y a nuestro estado de madurez. Eso lo valoramos muchísimo.
+              - img "NaranjaX" [ref=f2e343]
+              - generic [ref=f2e344]:
+                - strong [ref=f2e345]: Martín Gutiérrez
+                - generic [ref=f2e346]: Especialista en Ciberseguridad, NaranjaX
+            - article [ref=f2e347]:
+              - generic [ref=f2e348]:
+                - generic [aria-hidden] [ref=f2e349]: “
+                - paragraph [ref=f2e350]: Generó más orden y cultura en materia de ciberseguridad, tomando con más seriedad los riesgos que implican la seguridad de la información.
+              - img "Knight Piesold S.A." [ref=f2e353]
+              - generic [ref=f2e354]:
+                - strong [ref=f2e355]: Andoni Sagardia Hidalgo
+                - generic [ref=f2e356]: IT Administrador, Knight Piesold S.A.
+            - article [ref=f2e357]:
+              - generic [ref=f2e358]:
+                - generic [aria-hidden] [ref=f2e359]: “
+                - paragraph [ref=f2e360]: Whalemate nos está ayudando a hacer nuestro ambiente corporativo mucho más seguro a través de su plataforma de concientización, y gracias a eso puedo justificar ante el Board, con indicadores, la necesidad de invertir en Seguridad de la Información.
+              - img "GDL Logística" [ref=f2e363]
+              - generic [ref=f2e364]:
+                - strong [ref=f2e365]: Everton Braz
+                - generic [ref=f2e366]: Seguridad de la Información, GDL Logística
+            - article [ref=f2e367]:
+              - generic [ref=f2e368]:
+                - generic [aria-hidden] [ref=f2e369]: “
+                - paragraph [ref=f2e370]: Whalemate nos da la cercanía local que necesitamos para que la ciberseguridad sea parte de la cultura diaria de nuestros usuarios.
+              - img "Banco del Sol" [ref=f2e373]
+              - generic [ref=f2e374]:
+                - strong [ref=f2e375]: Javier Tepedino
+                - generic [ref=f2e376]: CISO, Banco del Sol
+            - article [ref=f2e377]:
+              - generic [ref=f2e378]:
+                - generic [aria-hidden] [ref=f2e379]: “
+                - paragraph [ref=f2e380]: Lo que nos permite Whalemate hoy es la personalización de las campañas adaptada a lo que necesita NaranjaX y a nuestro estado de madurez. Eso lo valoramos muchísimo.
+              - img "NaranjaX" [ref=f2e383]
+              - generic [ref=f2e384]:
+                - strong [ref=f2e385]: Martín Gutiérrez
+                - generic [ref=f2e386]: Especialista en Ciberseguridad, NaranjaX
+            - article [ref=f2e387]:
+              - generic [ref=f2e388]:
+                - generic [aria-hidden] [ref=f2e389]: “
+                - paragraph [ref=f2e390]: Generó más orden y cultura en materia de ciberseguridad, tomando con más seriedad los riesgos que implican la seguridad de la información.
+              - img "Knight Piesold S.A." [ref=f2e393]
+              - generic [ref=f2e394]:
+                - strong [ref=f2e395]: Andoni Sagardia Hidalgo
+                - generic [ref=f2e396]: IT Administrador, Knight Piesold S.A.
+            - article [ref=f2e397]:
+              - generic [ref=f2e398]:
+                - generic [aria-hidden] [ref=f2e399]: “
+                - paragraph [ref=f2e400]: Whalemate nos está ayudando a hacer nuestro ambiente corporativo mucho más seguro a través de su plataforma de concientización, y gracias a eso puedo justificar ante el Board, con indicadores, la necesidad de invertir en Seguridad de la Información.
+              - img "GDL Logística" [ref=f2e403]
+              - generic [ref=f2e404]:
+                - strong [ref=f2e405]: Everton Braz
+                - generic [ref=f2e406]: Seguridad de la Información, GDL Logística
+        - generic [ref=f2e408]:
+          - generic [ref=f2e409]: Para quién
+          - heading "Lo que gana cada área" [level=2] [ref=f2e411]
+          - paragraph [ref=f2e413]: El mismo dato de riesgo humano le sirve a seguridad, a compliance y al directorio.
+          - generic [ref=f2e414]:
+            - generic [ref=f2e416]:
+              - heading "Seguridad" [level=3] [ref=f2e419]
+              - paragraph [ref=f2e420]: "Sabés a quién priorizar y el programa corre de forma continua: simulaciones, refuerzo y seguimiento, sin armar campañas a mano."
+            - generic [ref=f2e422]:
+              - heading "Compliance y auditoría" [level=3] [ref=f2e425]
+              - paragraph [ref=f2e426]: Evidencia exportable del programa para auditorías de ISO/IEC 27001, PCI DSS 12.6 y NIST CSF, sin reconstruirla en planillas.
+            - generic [ref=f2e428]:
+              - heading "Dirección" [level=3] [ref=f2e431]
+              - paragraph [ref=f2e432]: Un indicador de riesgo humano que se entiende en el directorio y muestra cómo evoluciona, para decidir la inversión con datos.
+        - generic [ref=f2e434]:
+          - heading "Antes de agendar una demo" [level=2] [ref=f2e436]: Antes de agendaruna demo
+          - generic [ref=f2e437]:
+            - group [ref=f2e439]:
+              - generic "¿Qué es Whalemate?" [ref=f2e440] [cursor=pointer]
+              - generic [ref=f2e442]: "Whalemate es una plataforma de gestión de riesgo humano para empresas: el paso siguiente a la concientización en ciberseguridad. Simula ataques de phishing y QRishing, entrena a cada persona según su comportamiento y mide quién concentra el riesgo. Un agente de IA decide la próxima intervención de cada colaborador y un analista de Whalemate opera el programa junto a tu equipo."
+            - group [ref=f2e446]:
+              - generic "¿En qué se diferencia de un programa de concientización tradicional?" [ref=f2e447] [cursor=pointer]
+            - group [ref=f2e450]:
+              - generic "¿Cuánto trabajo implica para el equipo de seguridad?" [ref=f2e451] [cursor=pointer]
+            - group [ref=f2e454]:
+              - generic "¿Cómo se mide el impacto?" [ref=f2e455] [cursor=pointer]
+            - group [ref=f2e458]:
+              - generic "¿Reemplaza el programa de concientización que ya tenemos?" [ref=f2e459] [cursor=pointer]
+            - group [ref=f2e462]:
+              - generic "¿Cómo protegen los datos de nuestra organización?" [ref=f2e463] [cursor=pointer]
+          - generic [ref=f2e466]:
+            - generic [ref=f2e467]:
+              - heading "¿Sabés quién de tu equipo va a caer en el próximo phishing?" [level=2] [ref=f2e469]
+              - paragraph [ref=f2e471]: "Agendá una demo de 30 minutos: te mostramos cómo se ve el riesgo humano de tu organización, con tu industria como ejemplo."
+            - link "Agendar una demo" [ref=f2e474] [cursor=pointer]:
+              - /url: /contacto/
+    - contentinfo [ref=f2e476]:
+      - generic [ref=f2e477]:
+        - generic [ref=f2e478]:
+          - generic [ref=f2e479]:
+            - link "Whalemate":
+              - /url: /
+              - img "Whalemate"
+            - paragraph [ref=f2e480]: Plataforma agentic de gestión de riesgo humano en ciberseguridad.
+          - generic [ref=f2e481]:
+            - paragraph [ref=f2e482]: Plataforma
+            - list [ref=f2e483]:
+              - listitem [ref=f2e484]:
+                - link "Simulaciones avanzadas" [ref=f2e485] [cursor=pointer]:
+                  - /url: /plataforma/simulaciones-avanzadas/
+              - listitem [ref=f2e486]:
+                - link "Entrenamiento adaptativo" [ref=f2e487] [cursor=pointer]:
+                  - /url: /plataforma/entrenamiento-adaptativo/
+              - listitem [ref=f2e488]:
+                - link "Analítica de riesgo humano" [ref=f2e489] [cursor=pointer]:
+                  - /url: /plataforma/analitica-de-riesgo-humano/
+              - listitem [ref=f2e490]:
+                - link "Agente de concientización" [ref=f2e491] [cursor=pointer]:
+                  - /url: /plataforma/agente-de-concientizacion/
+              - listitem [ref=f2e492]:
+                - link "Integraciones" [ref=f2e493] [cursor=pointer]:
+                  - /url: /plataforma/integraciones/
+          - generic [ref=f2e494]:
+            - paragraph [ref=f2e495]: Recursos
+            - list [ref=f2e496]:
+              - listitem [ref=f2e497]:
+                - link "Podcast Capa8" [ref=f2e498] [cursor=pointer]:
+                  - /url: /recursos/podcast/
+              - listitem [ref=f2e499]:
+                - link "Blog" [ref=f2e500] [cursor=pointer]:
+                  - /url: /recursos/blog/
+              - listitem [ref=f2e501]:
+                - link "Casos de éxito" [ref=f2e502] [cursor=pointer]:
+                  - /url: /recursos/caso-de-exito/
+              - listitem [ref=f2e503]:
+                - link "Compliance" [ref=f2e504] [cursor=pointer]:
+                  - /url: /caso-de-uso/compliance/
+              - listitem [ref=f2e505]:
+                - link "Glosario HRM" [ref=f2e506] [cursor=pointer]:
+                  - /url: /recursos/glosario-hrm/
+              - listitem [ref=f2e507]:
+                - link "Ejemplos de phishing" [ref=f2e508] [cursor=pointer]:
+                  - /url: /recursos/ejemplos-de-phishing/
+              - listitem [ref=f2e509]:
+                - link "Alternativas" [ref=f2e510] [cursor=pointer]:
+                  - /url: /alternativas/
+          - generic [ref=f2e511]:
+            - paragraph [ref=f2e512]: Nosotros
+            - list [ref=f2e513]:
+              - listitem [ref=f2e514]:
+                - link "Planes" [ref=f2e515] [cursor=pointer]:
+                  - /url: /planes/
+              - listitem [ref=f2e516]:
+                - link "El equipo" [ref=f2e517] [cursor=pointer]:
+                  - /url: /nosotros/#team
+              - listitem [ref=f2e518]:
+                - link "Soluciones" [ref=f2e519] [cursor=pointer]:
+                  - /url: /soluciones/
+              - listitem [ref=f2e520]:
+                - link "Alternativas" [ref=f2e521] [cursor=pointer]:
+                  - /url: /alternativas/
+              - listitem [ref=f2e522]:
+                - link "Trust Center" [ref=f2e523] [cursor=pointer]:
+                  - /url: /seguridad/
+          - generic [ref=f2e524]:
+            - paragraph [ref=f2e525]: Legal
+            - list [ref=f2e526]:
+              - listitem [ref=f2e527]:
+                - link "Privacidad" [ref=f2e528] [cursor=pointer]:
+                  - /url: /legal/privacidad/
+              - listitem [ref=f2e529]:
+                - link "Términos" [ref=f2e530] [cursor=pointer]:
+                  - /url: /legal/terminos/
+              - listitem [ref=f2e531]:
+                - link "Cookies" [ref=f2e532] [cursor=pointer]:
+                  - /url: /legal/cookies/
+              - listitem [ref=f2e533]:
+                - link "DPA" [ref=f2e534] [cursor=pointer]:
+                  - /url: /legal/dpa/
+              - listitem [ref=f2e535]:
+                - link "Asistente Fede" [ref=f2e536] [cursor=pointer]:
+                  - /url: /legal/asistente-fede/
+          - generic [ref=f2e537]:
+            - paragraph [ref=f2e538]: Contacto
+            - link "Escribinos" [ref=f2e539] [cursor=pointer]:
+              - /url: /contacto/
+            - generic [ref=f2e540]:
+              - link "LinkedIn" [ref=f2e541] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/whalemate/
+              - link "YouTube" [ref=f2e544] [cursor=pointer]:
+                - /url: https://www.youtube.com/@PodcastCapa8-ok
+              - link "Spotify" [ref=f2e547] [cursor=pointer]:
+                - /url: https://open.spotify.com/show/6sIX7GIN5NaKfbVFpuQhFg?si=466de4208d824d93
+        - generic [ref=f2e550]:
+          - generic [ref=f2e551]: © 2026 Whalemate. Todos los derechos reservados.
+          - button "Toggle theme" [ref=f2e552] [cursor=pointer]:
+            - generic [ref=f2e553]: Light mode
+  - generic:
+    - generic [ref=f2e561] [cursor=pointer]:
+      - button "Hablar con Fede" [ref=f2e566]
+      - button "Mensaje" [ref=f2e575]
+      - combobox "Cambiar idioma" [ref=f2e581]:
+        - img "ES flag" [ref=f2e582]
+    - generic:
+      - paragraph:
+        - text: Powered by
+        - link "ElevenAgents" [ref=f2e588] [cursor=pointer]:
+          - /url: https://elevenlabs.io/agents
