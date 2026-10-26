@@ -302,3 +302,35 @@ CREATE TABLE IF NOT EXISTS audit_browser_artifacts (
   content BYTEA NOT NULL CHECK (octet_length(content) <= 3000000),
   PRIMARY KEY (report_id, name)
 );
+
+-- AI Search: manual mention registry (GEO/AEO). Zero external API cost.
+CREATE TABLE IF NOT EXISTS ai_prompts (
+  id BIGSERIAL PRIMARY KEY,
+  site_url TEXT NOT NULL,
+  prompt TEXT NOT NULL,
+  intent TEXT NOT NULL DEFAULT 'general',
+  language TEXT NOT NULL DEFAULT 'es',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'archived')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (site_url, prompt, language)
+);
+
+CREATE TABLE IF NOT EXISTS ai_mention_checks (
+  id BIGSERIAL PRIMARY KEY,
+  prompt_id BIGINT NOT NULL REFERENCES ai_prompts(id) ON DELETE CASCADE,
+  platform TEXT NOT NULL,
+  checked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  mentioned BOOLEAN NOT NULL DEFAULT FALSE,
+  brand_rank INTEGER,
+  citation_url TEXT,
+  sources JSONB NOT NULL DEFAULT '[]'::JSONB,
+  excerpt TEXT,
+  evidence_url TEXT,
+  notes TEXT
+);
+
+CREATE INDEX IF NOT EXISTS ai_prompts_site_idx ON ai_prompts (site_url, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS ai_mention_checks_prompt_idx ON ai_mention_checks (prompt_id, checked_at DESC);
+CREATE INDEX IF NOT EXISTS ai_mention_checks_platform_idx ON ai_mention_checks (platform, checked_at DESC);
+

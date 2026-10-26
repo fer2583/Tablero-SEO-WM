@@ -5,7 +5,17 @@ import type { IntegrationFilters } from "@/lib/integrations";
 
 export type ConfigurationSource = { key: string; name: string; status: "connected" | "configured" | "unavailable" | "error"; detail: string; lastSync: string | null };
 export type ConfigurationState = { status: "loading" | "ready" | "error"; sources: ConfigurationSource[]; error?: string };
-export type FilterContextValue = { filters: IntegrationFilters; refreshKey: number; updateFilter: (key: keyof IntegrationFilters, value: string) => void; refresh: () => void; configuration: ConfigurationState };
+export type Density = "comfortable" | "compact";
+export type FilterContextValue = {
+  filters: IntegrationFilters;
+  refreshKey: number;
+  updateFilter: (key: keyof IntegrationFilters, value: string) => void;
+  refresh: () => void;
+  configuration: ConfigurationState;
+  density: Density;
+  setDensity: (density: Density) => void;
+  openCommand: () => void;
+};
 export const FilterContext = createContext<FilterContextValue | null>(null);
 export function useDashboardFilters() {
   const context = useContext(FilterContext);
