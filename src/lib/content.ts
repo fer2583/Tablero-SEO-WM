@@ -1,4 +1,6 @@
 import { fetchAnalytics, fetchSearchConsoleWorkspace, type AnalyticsData, type IntegrationFilters, type SearchConsoleWorkspaceData } from "@/lib/integrations";
+import { isOpportunity } from "@/lib/opportunities";
+import { pageKey } from "@/lib/urls";
 
 export type ContentQuery = { query: string; page: string; clicks: number; impressions: number; ctr: number; position: number };
 export type ContentPage = { page: string; sessions: number | null; clicks: number; impressions: number; engagementRate: number | null };
@@ -11,7 +13,7 @@ export type ContentData = {
   opportunities: ContentQuery[];
   related: Array<{ cluster: string; queries: string[]; page: string }>;
   withoutPage: ContentQuery[];
-  cannibalization: Array<{ query: string; pages: string[]; clicks: number; impressions: number }>;
+  cannibalization: Array<{ query: string; pages: string[]; clicks: number; impressions: number; confidence: "possible" }>;
   ga4Warning?: string;
 };
 
@@ -28,12 +30,19 @@ export async function fetchContent(filters: IntegrationFilters): Promise<Content
   }
   const pageMap = new Map<string, ContentPage>();
   for (const row of gsc.rows.filter((row) => row.page)) {
-    const current = pageMap.get(row.page ?? "") ?? { page: row.page ?? "", sessions: null, clicks: 0, impressions: 0, engagementRate: null };
-    current.clicks += row.clicks; current.impressions += row.impressions; pageMap.set(current.page, current);
+    const key = pageKey(row.page);
+    const current = pageMap.get(key) ?? { page: row.page ?? "", sessions: null, clicks: 0, impressions: 0, engagementRate: null };
+    current.clicks += row.clicks; current.impressions += row.impressions; pageMap.set(key, current);
   }
   for (const row of analytics?.landingPages ?? []) {
-    const current = pageMap.get(row.page) ?? { page: row.page, sessions: 0, clicks: 0, impressions: 0, engagementRate: null };
-    current.sessions = (current.sessions ?? 0) + row.sessions; current.engagementRate = row.engagementRate; pageMap.set(row.page, current);
+    const key = pageKey(row.page);
+    const existing = pageMap.get(key);
+    if (existing) {
+      existing.sessions = (existing.sessions ?? 0) + row.sessions;
+      existing.engagementRate = row.engagementRate;
+    } else {
+      pageMap.set(key, { page: row.page, sessions: row.sessions, clicks: 0, impressions: 0, engagementRate: row.engagementRate });
+    }
   }
   const byQuery = new Map<string, ContentQuery[]>();
   queries.forEach((row) => byQuery.set(row.query, [...(byQuery.get(row.query) ?? []), row]));
@@ -45,10 +54,10 @@ export async function fetchContent(filters: IntegrationFilters): Promise<Content
     ga4Status: analytics ? (analytics.landingPages.length ? "live" : "no_data") : "unavailable",
     queries,
     pages: [...pageMap.values()].sort((a, b) => b.impressions - a.impressions),
-    opportunities: queries.filter((row) => row.position >= 4 && row.position <= 15 && row.impressions >= 50 && row.ctr < 0.03).sort((a, b) => b.impressions - a.impressions),
+    opportunities: queries.filter((row) => isOpportunity({ impressions: row.impressions, ctr: row.ctr, position: row.position, clicks: row.clicks })).sort((a, b) => b.impressions - a.impressions),
     related: [...relatedMap.entries()].filter(([, rows]) => rows.length > 1).slice(0, 20).map(([cluster, rows]) => ({ cluster, queries: rows.map((row) => row.query), page: [...new Set(rows.map((row) => row.page).filter(Boolean))].length === 1 ? rows[0].page : "No data" })),
     withoutPage: queries.filter((row) => !row.page),
-    cannibalization: [...byQuery.entries()].filter(([, rows]) => new Set(rows.map((row) => row.page).filter(Boolean)).size > 1).map(([query, rows]) => ({ query, pages: [...new Set(rows.map((row) => row.page).filter(Boolean))], clicks: rows.reduce((sum, row) => sum + row.clicks, 0), impressions: rows.reduce((sum, row) => sum + row.impressions, 0) })),
+    cannibalization: [...byQuery.entries()].filter(([, rows]) => new Set(rows.map((row) => row.page).filter(Boolean)).size > 1).map(([query, rows]) => ({ query, pages: [...new Set(rows.map((row) => row.page).filter(Boolean))], clicks: rows.reduce((sum, row) => sum + row.clicks, 0), impressions: rows.reduce((sum, row) => sum + row.impressions, 0), confidence: "possible" as const })),
     ga4Warning,
   };
 }

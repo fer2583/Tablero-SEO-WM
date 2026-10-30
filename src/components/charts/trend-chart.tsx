@@ -1,7 +1,6 @@
 "use client";
 
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { KeywordDaily } from "@/lib/keywords";
 import { ChartEmpty, ChartTooltip } from "./chart-tooltip";
 
 const compact = new Intl.NumberFormat("es-ES", { notation: "compact", maximumFractionDigits: 1 });
@@ -10,7 +9,9 @@ const day = (value: string) => {
   return Number.isNaN(parsed.getTime()) ? value : new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "short", timeZone: "UTC" }).format(parsed).replace(" de ", " ");
 };
 
-export function TrendChart({ data }: { data: KeywordDaily[] }) {
+export type TrendPoint = { date: string; clicks: number; impressions: number };
+
+export function TrendChart({ data }: { data: TrendPoint[] }) {
   if (!data.length) return <ChartEmpty label="Search Console todavía no devolvió la serie diaria." />;
   return (
     <div className="h-[264px] w-full">

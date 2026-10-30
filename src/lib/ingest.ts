@@ -1,6 +1,6 @@
 import "server-only";
 
-import { acquireSynchronizationLock, releaseSynchronizationLock, saveGa4Daily, saveGa4LandingPages, saveGscPages, saveGscPerformance, saveGscQueries, saveSourceSnapshot, saveSynchronization } from "@/db/queries";
+import { acquireSynchronizationLock, releaseSynchronizationLock, saveGa4AiDaily, saveGa4Daily, saveGa4LandingPages, saveGscPages, saveGscPerformance, saveGscQueries, saveGscQueryPages, saveSourceSnapshot, saveSynchronization } from "@/db/queries";
 import { dates, fetchAnalytics, fetchAnalyticsDaily, fetchSearchConsole, fetchSearchConsoleDaily, type IntegrationFilters } from "@/lib/integrations";
 import { SITE_URL } from "@/lib/site";
 import { evaluateAlerts } from "@/lib/alerts";
@@ -8,7 +8,7 @@ import { evaluateAlerts } from "@/lib/alerts";
 export type IngestSource = "gsc" | "ga4";
 export type IngestResult = { source: IngestSource; status: "success" | "running" | "error"; generatedAt?: string; error?: string };
 
-const filters: IntegrationFilters = { days: 30 as 7 | 28 | 60 | 90, language: "all", country: "all", device: "all" };
+const filters: IntegrationFilters = { days: 30 as 7 | 28 | 60 | 90, language: "all", country: "all", device: "all", compare: "previous" };
 
 export async function ingestSources(sources: IngestSource[], force = false): Promise<IngestResult[]> {
   const selected = [...new Set(sources)];
@@ -31,11 +31,13 @@ async function ingestSource(source: IngestSource, _force: boolean): Promise<Inge
       await saveGscPerformance(daily.performance.map((row) => ({ siteUrl: SITE_URL, day: row.day, clicks: row.clicks, impressions: row.impressions, ctr: row.ctr, position: row.position })));
       await saveGscQueries(daily.queries.map((row) => ({ siteUrl: SITE_URL, day: row.day, query: row.query, clicks: row.clicks, impressions: row.impressions, ctr: row.ctr, position: row.position })));
       await saveGscPages(daily.pages.map((row) => ({ siteUrl: SITE_URL, day: row.day, pageUrl: row.pageUrl, clicks: row.clicks, impressions: row.impressions, ctr: row.ctr, position: row.position })));
+      await saveGscQueryPages(daily.queryPages.map((row) => ({ siteUrl: SITE_URL, day: row.day, query: row.query, pageUrl: row.pageUrl, clicks: row.clicks, impressions: row.impressions, ctr: row.ctr, position: row.position })));
       await saveSourceSnapshot(SITE_URL, "search-console", "gsc-summary:30:all:all:all", { ...data, generatedAt });
     } else {
       const [data, daily] = await Promise.all([fetchAnalytics(filters), fetchAnalyticsDaily()]);
       await saveGa4Daily(daily.daily.map((row) => ({ siteUrl: SITE_URL, day: row.day, channel: row.channel, users: row.users, sessions: row.sessions, engagedSessions: row.engagedSessions, conversions: row.conversions, engagementRate: row.engagementRate, engagementDuration: row.engagementDuration })));
       await saveGa4LandingPages(daily.landingPages.map((row) => ({ siteUrl: SITE_URL, day: row.day, landingPage: row.landingPage, users: row.users, sessions: row.sessions, conversions: row.conversions, engagementRate: row.engagementRate })));
+      await saveGa4AiDaily(daily.aiDaily.map((row) => ({ siteUrl: SITE_URL, day: row.day, source: row.source, users: row.users, sessions: row.sessions, conversions: row.conversions })));
       await saveSourceSnapshot(SITE_URL, "analytics", "ga4-summary:30:all:all:all", { ...data, generatedAt });
     }
     await saveSynchronization({ source: lockSource, status: "success" });

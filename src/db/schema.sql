@@ -334,3 +334,36 @@ CREATE INDEX IF NOT EXISTS ai_prompts_site_idx ON ai_prompts (site_url, status, 
 CREATE INDEX IF NOT EXISTS ai_mention_checks_prompt_idx ON ai_mention_checks (prompt_id, checked_at DESC);
 CREATE INDEX IF NOT EXISTS ai_mention_checks_platform_idx ON ai_mention_checks (platform, checked_at DESC);
 
+
+-- Histórico conjunto consulta + página (relación que GSC entrega en vivo y
+-- antes se descartaba al guardar queries y pages por separado).
+CREATE TABLE IF NOT EXISTS gsc_query_pages_daily (
+  id BIGSERIAL PRIMARY KEY,
+  site_url TEXT NOT NULL,
+  day DATE NOT NULL,
+  query TEXT NOT NULL,
+  page_url TEXT NOT NULL,
+  clicks NUMERIC NOT NULL DEFAULT 0,
+  impressions NUMERIC NOT NULL DEFAULT 0,
+  ctr NUMERIC NOT NULL DEFAULT 0,
+  position NUMERIC NOT NULL DEFAULT 0,
+  fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (site_url, day, query, page_url)
+);
+
+CREATE INDEX IF NOT EXISTS gsc_query_pages_daily_range_idx ON gsc_query_pages_daily (site_url, day);
+
+-- Tráfico IA persistido para no consultar GA4 en vivo en cada carga.
+CREATE TABLE IF NOT EXISTS ga4_ai_daily (
+  id BIGSERIAL PRIMARY KEY,
+  site_url TEXT NOT NULL,
+  day DATE NOT NULL,
+  source TEXT NOT NULL DEFAULT 'all',
+  users NUMERIC NOT NULL DEFAULT 0,
+  sessions NUMERIC NOT NULL DEFAULT 0,
+  conversions NUMERIC NOT NULL DEFAULT 0,
+  fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (site_url, day, source)
+);
+
+CREATE INDEX IF NOT EXISTS ga4_ai_daily_range_idx ON ga4_ai_daily (site_url, day);

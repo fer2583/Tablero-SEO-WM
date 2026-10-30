@@ -2,6 +2,20 @@ import "server-only";
 
 import { getDb } from "@/db/client";
 
+/**
+ * Upsert por lotes. Las ingestas diarias escriben miles de filas; hacerlo fila
+ * por fila multiplica la latencia y hace inviable el cron/backfill.
+ */
+async function bulkUpsert(prefix: string, columns: string[], rows: unknown[][], conflict: string, update: string, chunkSize = 500) {
+  for (let offset = 0; offset < rows.length; offset += chunkSize) {
+    const chunk = rows.slice(offset, offset + chunkSize);
+    const values = chunk
+      .map((_, rowIndex) => `(${columns.map((__, columnIndex) => `$${rowIndex * columns.length + columnIndex + 1}`).join(", ")})`)
+      .join(", ");
+    await getDb().query(`${prefix} VALUES ${values} ON CONFLICT (${conflict}) DO UPDATE SET ${update}`, chunk.flat());
+  }
+}
+
 export type Synchronization = {
   source: string;
   status: "idle" | "running" | "success" | "error";
@@ -194,24 +208,191 @@ export async function getLatestAuditVitals(siteUrl: string) {
   return result.rows;
 }
 
-export type MetricRow = { day: string; value?: number; siteUrl: string; country?: string; device?: string; language?: string; query?: string; pageUrl?: string; channel?: string; landingPage?: string; clicks?: number; impressions?: number; ctr?: number; position?: number; users?: number; sessions?: number; conversions?: number; engagedSessions?: number; engagementRate?: number; engagementDuration?: number };
+export type MetricRow = { day: string; value?: number; siteUrl: string; country?: string; device?: string; language?: string; query?: string; pageUrl?: string; channel?: string; landingPage?: string; source?: string; clicks?: number; impressions?: number; ctr?: number; position?: number; users?: number; sessions?: number; conversions?: number; engagedSessions?: number; engagementRate?: number; engagementDuration?: number };
 
 export async function saveGscPerformance(rows: MetricRow[]) {
-  for (const row of rows) await getDb().query(`INSERT INTO gsc_performance_daily (site_url, day, country, device, language, clicks, impressions, ctr, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (site_url, day, country, device, language) DO UPDATE SET clicks = EXCLUDED.clicks, impressions = EXCLUDED.impressions, ctr = EXCLUDED.ctr, position = EXCLUDED.position, fetched_at = NOW()`, [row.siteUrl, row.day, row.country ?? "all", row.device ?? "all", row.language ?? "all", row.clicks ?? row.value, row.impressions ?? 0, row.ctr ?? 0, row.position ?? 0]);
+  await bulkUpsert(
+    `INSERT INTO gsc_performance_daily (site_url, day, country, device, language, clicks, impressions, ctr, position)`,
+    ["site_url", "day", "country", "device", "language", "clicks", "impressions", "ctr", "position"],
+    rows.map((row) => [row.siteUrl, row.day, row.country ?? "all", row.device ?? "all", row.language ?? "all", row.clicks ?? row.value ?? 0, row.impressions ?? 0, row.ctr ?? 0, row.position ?? 0]),
+    "site_url, day, country, device, language",
+    "clicks = EXCLUDED.clicks, impressions = EXCLUDED.impressions, ctr = EXCLUDED.ctr, position = EXCLUDED.position, fetched_at = NOW()",
+  );
 }
 
 export async function saveGscQueries(rows: MetricRow[]) {
-  for (const row of rows) await getDb().query(`INSERT INTO gsc_queries_daily (site_url, day, query, country, device, clicks, impressions, ctr, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (site_url, day, query, country, device) DO UPDATE SET clicks = EXCLUDED.clicks, impressions = EXCLUDED.impressions, ctr = EXCLUDED.ctr, position = EXCLUDED.position, fetched_at = NOW()`, [row.siteUrl, row.day, row.query ?? "", row.country ?? "all", row.device ?? "all", row.clicks ?? 0, row.impressions ?? 0, row.ctr ?? 0, row.position ?? 0]);
+  await bulkUpsert(
+    `INSERT INTO gsc_queries_daily (site_url, day, query, country, device, clicks, impressions, ctr, position)`,
+    ["site_url", "day", "query", "country", "device", "clicks", "impressions", "ctr", "position"],
+    rows.map((row) => [row.siteUrl, row.day, row.query ?? "", row.country ?? "all", row.device ?? "all", row.clicks ?? 0, row.impressions ?? 0, row.ctr ?? 0, row.position ?? 0]),
+    "site_url, day, query, country, device",
+    "clicks = EXCLUDED.clicks, impressions = EXCLUDED.impressions, ctr = EXCLUDED.ctr, position = EXCLUDED.position, fetched_at = NOW()",
+  );
 }
 
 export async function saveGscPages(rows: MetricRow[]) {
-  for (const row of rows) await getDb().query(`INSERT INTO gsc_pages_daily (site_url, day, page_url, country, device, clicks, impressions, ctr, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (site_url, day, page_url, country, device) DO UPDATE SET clicks = EXCLUDED.clicks, impressions = EXCLUDED.impressions, ctr = EXCLUDED.ctr, position = EXCLUDED.position, fetched_at = NOW()`, [row.siteUrl, row.day, row.pageUrl ?? "", row.country ?? "all", row.device ?? "all", row.clicks ?? 0, row.impressions ?? 0, row.ctr ?? 0, row.position ?? 0]);
+  await bulkUpsert(
+    `INSERT INTO gsc_pages_daily (site_url, day, page_url, country, device, clicks, impressions, ctr, position)`,
+    ["site_url", "day", "page_url", "country", "device", "clicks", "impressions", "ctr", "position"],
+    rows.map((row) => [row.siteUrl, row.day, row.pageUrl ?? "", row.country ?? "all", row.device ?? "all", row.clicks ?? 0, row.impressions ?? 0, row.ctr ?? 0, row.position ?? 0]),
+    "site_url, day, page_url, country, device",
+    "clicks = EXCLUDED.clicks, impressions = EXCLUDED.impressions, ctr = EXCLUDED.ctr, position = EXCLUDED.position, fetched_at = NOW()",
+  );
 }
 
 export async function saveGa4Daily(rows: MetricRow[]) {
-  for (const row of rows) await getDb().query(`INSERT INTO ga4_daily (site_url, day, country, device, channel, users, sessions, engaged_sessions, conversions, engagement_rate, engagement_duration) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) ON CONFLICT (site_url, day, country, device, channel) DO UPDATE SET users = EXCLUDED.users, sessions = EXCLUDED.sessions, engaged_sessions = EXCLUDED.engaged_sessions, conversions = EXCLUDED.conversions, engagement_rate = EXCLUDED.engagement_rate, engagement_duration = EXCLUDED.engagement_duration, fetched_at = NOW()`, [row.siteUrl, row.day, row.country ?? "all", row.device ?? "all", row.channel ?? "all", row.users ?? 0, row.sessions ?? 0, row.engagedSessions ?? 0, row.conversions ?? 0, row.engagementRate ?? 0, row.engagementDuration ?? 0]);
+  await bulkUpsert(
+    `INSERT INTO ga4_daily (site_url, day, country, device, channel, users, sessions, engaged_sessions, conversions, engagement_rate, engagement_duration)`,
+    ["site_url", "day", "country", "device", "channel", "users", "sessions", "engaged_sessions", "conversions", "engagement_rate", "engagement_duration"],
+    rows.map((row) => [row.siteUrl, row.day, row.country ?? "all", row.device ?? "all", row.channel ?? "all", row.users ?? 0, row.sessions ?? 0, row.engagedSessions ?? 0, row.conversions ?? 0, row.engagementRate ?? 0, row.engagementDuration ?? 0]),
+    "site_url, day, country, device, channel",
+    "users = EXCLUDED.users, sessions = EXCLUDED.sessions, engaged_sessions = EXCLUDED.engaged_sessions, conversions = EXCLUDED.conversions, engagement_rate = EXCLUDED.engagement_rate, engagement_duration = EXCLUDED.engagement_duration, fetched_at = NOW()",
+  );
 }
 
 export async function saveGa4LandingPages(rows: MetricRow[]) {
-  for (const row of rows) await getDb().query(`INSERT INTO ga4_landing_pages (site_url, day, landing_page, country, device, users, sessions, conversions, engagement_rate) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (site_url, day, landing_page, country, device) DO UPDATE SET users = EXCLUDED.users, sessions = EXCLUDED.sessions, conversions = EXCLUDED.conversions, engagement_rate = EXCLUDED.engagement_rate, fetched_at = NOW()`, [row.siteUrl, row.day, row.landingPage ?? "", row.country ?? "all", row.device ?? "all", row.users ?? 0, row.sessions ?? 0, row.conversions ?? 0, row.engagementRate ?? 0]);
+  await bulkUpsert(
+    `INSERT INTO ga4_landing_pages (site_url, day, landing_page, country, device, users, sessions, conversions, engagement_rate)`,
+    ["site_url", "day", "landing_page", "country", "device", "users", "sessions", "conversions", "engagement_rate"],
+    rows.map((row) => [row.siteUrl, row.day, row.landingPage ?? "", row.country ?? "all", row.device ?? "all", row.users ?? 0, row.sessions ?? 0, row.conversions ?? 0, row.engagementRate ?? 0]),
+    "site_url, day, landing_page, country, device",
+    "users = EXCLUDED.users, sessions = EXCLUDED.sessions, conversions = EXCLUDED.conversions, engagement_rate = EXCLUDED.engagement_rate, fetched_at = NOW()",
+  );
+}
+
+export async function saveGscQueryPages(rows: MetricRow[]) {
+  await bulkUpsert(
+    `INSERT INTO gsc_query_pages_daily (site_url, day, query, page_url, clicks, impressions, ctr, position)`,
+    ["site_url", "day", "query", "page_url", "clicks", "impressions", "ctr", "position"],
+    rows.map((row) => [row.siteUrl, row.day, row.query ?? "", row.pageUrl ?? "", row.clicks ?? 0, row.impressions ?? 0, row.ctr ?? 0, row.position ?? 0]),
+    "site_url, day, query, page_url",
+    "clicks = EXCLUDED.clicks, impressions = EXCLUDED.impressions, ctr = EXCLUDED.ctr, position = EXCLUDED.position, fetched_at = NOW()",
+  );
+}
+
+export async function saveGa4AiDaily(rows: MetricRow[]) {
+  await bulkUpsert(
+    `INSERT INTO ga4_ai_daily (site_url, day, source, users, sessions, conversions)`,
+    ["site_url", "day", "source", "users", "sessions", "conversions"],
+    rows.map((row) => [row.siteUrl, row.day, row.source ?? "all", row.users ?? 0, row.sessions ?? 0, row.conversions ?? 0]),
+    "site_url, day, source",
+    "users = EXCLUDED.users, sessions = EXCLUDED.sessions, conversions = EXCLUDED.conversions, fetched_at = NOW()",
+  );
+}
+
+export type GscTotals = { clicks: number; impressions: number; ctr: number; position: number };
+
+export async function getGscTotals(siteUrl: string, start: string, end: string): Promise<GscTotals> {
+  const result = await getDb().query<GscTotals>(
+    `SELECT COALESCE(SUM(clicks), 0)::float AS clicks,
+            COALESCE(SUM(impressions), 0)::float AS impressions,
+            CASE WHEN SUM(impressions) > 0 THEN SUM(clicks) / SUM(impressions) ELSE 0 END::float AS ctr,
+            CASE WHEN SUM(impressions) > 0 THEN SUM(position * impressions) / SUM(impressions) ELSE 0 END::float AS position
+     FROM gsc_performance_daily
+     WHERE site_url = $1 AND day BETWEEN $2 AND $3`,
+    [siteUrl, start, end],
+  );
+  return result.rows[0] ?? { clicks: 0, impressions: 0, ctr: 0, position: 0 };
+}
+
+export type SummaryQueryRow = {
+  query: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number | null;
+  previousClicks: number;
+  previousPosition: number | null;
+};
+
+export async function getGscQueryRows(siteUrl: string, start: string, end: string, previousStart: string, previousEnd: string, limit = 50_000) {
+  const result = await getDb().query<SummaryQueryRow>(
+    `WITH current_rows AS (
+       SELECT query,
+              SUM(clicks)::float AS clicks,
+              SUM(impressions)::float AS impressions,
+              CASE WHEN SUM(impressions) > 0 THEN SUM(position * impressions) / SUM(impressions) END AS position
+       FROM gsc_queries_daily
+       WHERE site_url = $1 AND day BETWEEN $2 AND $3
+       GROUP BY query
+     ), previous_rows AS (
+       SELECT query,
+              SUM(clicks)::float AS "previousClicks",
+              CASE WHEN SUM(impressions) > 0 THEN SUM(position * impressions) / SUM(impressions) END AS "previousPosition"
+       FROM gsc_queries_daily
+       WHERE site_url = $1 AND day BETWEEN $4 AND $5
+       GROUP BY query
+     )
+     SELECT current_rows.query,
+            current_rows.clicks,
+            current_rows.impressions,
+            CASE WHEN current_rows.impressions > 0 THEN current_rows.clicks / current_rows.impressions ELSE 0 END::float AS ctr,
+            current_rows.position,
+            COALESCE(previous_rows."previousClicks", 0)::float AS "previousClicks",
+            previous_rows."previousPosition"
+     FROM current_rows
+     LEFT JOIN previous_rows USING (query)
+     ORDER BY current_rows.impressions DESC NULLS LAST
+     LIMIT $6`,
+    [siteUrl, start, end, previousStart, previousEnd, limit],
+  );
+  return result.rows;
+}
+
+export async function getGscDailySeries(siteUrl: string, start: string, end: string) {
+  const result = await getDb().query<{ day: string; clicks: number; impressions: number }>(
+    `SELECT day::text AS day, SUM(clicks)::float AS clicks, SUM(impressions)::float AS impressions
+     FROM gsc_performance_daily
+     WHERE site_url = $1 AND day BETWEEN $2 AND $3
+     GROUP BY day ORDER BY day`,
+    [siteUrl, start, end],
+  );
+  return result.rows.map((row) => ({ date: row.day, clicks: Number(row.clicks), impressions: Number(row.impressions) }));
+}
+
+export type Ga4Totals = { sessions: number; engagedSessions: number; conversions: number; engagementRate: number };
+
+export async function getGa4Totals(siteUrl: string, start: string, end: string): Promise<Ga4Totals> {
+  const result = await getDb().query<Ga4Totals>(
+    `SELECT COALESCE(SUM(sessions), 0)::float AS sessions,
+            COALESCE(SUM(engaged_sessions), 0)::float AS "engagedSessions",
+            COALESCE(SUM(conversions), 0)::float AS conversions,
+            CASE WHEN SUM(sessions) > 0 THEN SUM(engaged_sessions) / SUM(sessions) ELSE 0 END::float AS "engagementRate"
+     FROM ga4_daily
+     WHERE site_url = $1 AND day BETWEEN $2 AND $3`,
+    [siteUrl, start, end],
+  );
+  return result.rows[0] ?? { sessions: 0, engagedSessions: 0, conversions: 0, engagementRate: 0 };
+}
+
+export async function getGa4DailySeries(siteUrl: string, start: string, end: string) {
+  const result = await getDb().query<{ day: string; sessions: number; conversions: number }>(
+    `SELECT day::text AS day, SUM(sessions)::float AS sessions, SUM(conversions)::float AS conversions
+     FROM ga4_daily
+     WHERE site_url = $1 AND day BETWEEN $2 AND $3
+     GROUP BY day ORDER BY day`,
+    [siteUrl, start, end],
+  );
+  return result.rows.map((row) => ({ date: row.day, sessions: Number(row.sessions), conversions: Number(row.conversions) }));
+}
+
+export async function getGa4AiTotals(siteUrl: string, start: string, end: string) {
+  const result = await getDb().query<{ sessions: number; conversions: number }>(
+    `SELECT COALESCE(SUM(sessions), 0)::float AS sessions, COALESCE(SUM(conversions), 0)::float AS conversions
+     FROM ga4_ai_daily
+     WHERE site_url = $1 AND day BETWEEN $2 AND $3`,
+    [siteUrl, start, end],
+  );
+  return result.rows[0] ?? { sessions: 0, conversions: 0 };
+}
+
+export async function getGa4AiDailySeries(siteUrl: string, start: string, end: string) {
+  const result = await getDb().query<{ day: string; sessions: number }>(
+    `SELECT day::text AS day, SUM(sessions)::float AS sessions
+     FROM ga4_ai_daily
+     WHERE site_url = $1 AND day BETWEEN $2 AND $3
+     GROUP BY day ORDER BY day`,
+    [siteUrl, start, end],
+  );
+  return result.rows.map((row) => ({ date: row.day, sessions: Number(row.sessions) }));
 }

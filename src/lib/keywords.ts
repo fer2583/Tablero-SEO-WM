@@ -1,6 +1,7 @@
 import "server-only";
 
-import { dates, searchConsoleClient, searchConsoleSite, type IntegrationFilters } from "@/lib/integrations";
+import { periods, searchConsoleClient, searchConsoleSite, type IntegrationFilters } from "@/lib/integrations";
+import { expectedCtrFor, isOpportunity, opportunityScoreFor, potentialClicksFor } from "@/lib/opportunities";
 
 export type KeywordRow = {
   query: string;
@@ -26,10 +27,10 @@ export type KeywordRow = {
 
 export type KeywordDaily = { date: string; clicks: number; impressions: number; ctr: number; position: number };
 export type KeywordTotals = { clicks: number; impressions: number; ctr: number; position: number };
-export type CannibalizationRow = { query: string; pages: string[]; clicks: number; impressions: number; share: number };
+export type CannibalizationRow = { query: string; pages: string[]; clicks: number; impressions: number; share: number; confidence: "possible" };
 
 export type KeywordsData = {
-  period: ReturnType<typeof dates>;
+  period: { start: string; end: string; previousStart: string; previousEnd: string };
   totals: KeywordTotals;
   previous: KeywordTotals | null;
   daily: KeywordDaily[];
@@ -55,17 +56,8 @@ export function isBrandQuery(query: string) {
   return BRAND_TERMS.some((term) => normalized.includes(term));
 }
 
-/**
- * Curva de CTR esperada por posición, basada en benchmarks públicos de búsqueda
- * orgánica. Se usa solo para estimar potencial, nunca como dato observado.
- */
-const CTR_BY_POSITION = [0.284, 0.152, 0.113, 0.081, 0.061, 0.045, 0.035, 0.028, 0.024, 0.019];
-
-export function expectedCtrFor(position: number) {
-  if (!Number.isFinite(position) || position <= 0) return null;
-  if (position <= 10) return CTR_BY_POSITION[Math.ceil(position) - 1] ?? 0.019;
-  return Math.max(0.002, 0.019 * Math.pow(10 / position, 0.7));
-}
+/** Reexportado para compatibilidad; la definición vive en lib/opportunities.ts. */
+export { expectedCtrFor };
 
 function summarize(rows: Array<{ clicks: number; impressions: number; position: number }>): KeywordTotals {
   const clicks = rows.reduce((total, row) => total + row.clicks, 0);
@@ -104,7 +96,8 @@ function aggregateByQuery(rows: GscRow[]) {
 }
 
 export async function fetchKeywords(filters: IntegrationFilters): Promise<KeywordsData> {
-  const period = dates(filters.days);
+  const window = periods(filters.days, filters.compare);
+  const period = { start: window.start, end: window.end, previousStart: window.compareStart, previousEnd: window.compareEnd };
   const client = searchConsoleClient();
 
   const dimensionFilters = [
@@ -119,14 +112,26 @@ export async function fetchKeywords(filters: IntegrationFilters): Promise<Keywor
 
   const filterGroups = dimensionFilters.length ? [{ groupType: "and" as const, filters: dimensionFilters }] : undefined;
 
-  const queryPair = (startDate: string, endDate: string) =>
-    client.searchanalytics
-      .query({
-        siteUrl: searchConsoleSite(),
-        requestBody: { startDate, endDate, dimensions: ["query", "page"], dimensionFilterGroups: filterGroups, rowLimit: 1_000 },
-      })
-      .then((response) => response.data.rows ?? [])
-      .catch(() => [] as GscRow[]);
+  const queryPair = async (startDate: string, endDate: string) => {
+    const rows: GscRow[] = [];
+    const pageSize = 25_000;
+    let startRow = 0;
+    try {
+      while (rows.length < 25_000) {
+        const response = await client.searchanalytics.query({
+          siteUrl: searchConsoleSite(),
+          requestBody: { startDate, endDate, dimensions: ["query", "page"], dimensionFilterGroups: filterGroups, rowLimit: pageSize, startRow },
+        });
+        const batch = response.data.rows ?? [];
+        rows.push(...batch);
+        if (batch.length < pageSize) break;
+        startRow += pageSize;
+      }
+    } catch {
+      return rows;
+    }
+    return rows.slice(0, 25_000);
+  };
 
   const dailyRequest = client.searchanalytics
     .query({
@@ -157,7 +162,8 @@ export async function fetchKeywords(filters: IntegrationFilters): Promise<Keywor
     const previousClicks = previousRow ? number(previousRow.clicks) : previousQuery ? previousQuery.clicks : 0;
     const previousPosition = previousRow ? number(previousRow.position) : previousQuery?.position ?? null;
     const expectedCtr = expectedCtrFor(position);
-    const potentialClicks = expectedCtr == null ? null : Math.max(0, Math.round(impressions * Math.max(0, expectedCtr - clicks / Math.max(impressions, 1))));
+    const opportunityInput = { impressions, ctr: number(row.ctr), position, clicks };
+    const potentialClicks = potentialClicksFor(opportunityInput);
     return {
       query,
       page,
@@ -177,7 +183,7 @@ export async function fetchKeywords(filters: IntegrationFilters): Promise<Keywor
       positionDelta: previousPosition == null ? null : previousPosition - position,
       expectedCtr,
       potentialClicks,
-      opportunityScore: potentialClicks == null ? null : Math.min(100, Math.round((potentialClicks / Math.max(impressions, 1)) * 380)),
+      opportunityScore: opportunityScoreFor(opportunityInput),
     };
   });
 
@@ -201,6 +207,7 @@ export async function fetchKeywords(filters: IntegrationFilters): Promise<Keywor
         clicks: value.clicks,
         impressions: value.impressions,
         share: value.clicks ? Math.round((topClicks / value.clicks) * 100) : 0,
+        confidence: "possible" as const,
       };
     })
     .sort((a, b) => b.impressions - a.impressions);
@@ -225,7 +232,7 @@ export async function fetchKeywords(filters: IntegrationFilters): Promise<Keywor
     .slice(0, 20);
 
   const opportunities = rows
-    .filter((row) => (row.potentialClicks ?? 0) >= 5 && row.position >= 3 && row.position <= 30)
+    .filter((row) => isOpportunity({ impressions: row.impressions, ctr: row.ctr, position: row.position, clicks: row.clicks }))
     .sort((a, b) => (b.potentialClicks ?? 0) - (a.potentialClicks ?? 0))
     .slice(0, 50);
 
@@ -241,6 +248,6 @@ export async function fetchKeywords(filters: IntegrationFilters): Promise<Keywor
     losers,
     opportunities,
     cannibalization,
-    truncated: currentRows.length >= 1_000,
+    truncated: currentRows.length >= 25_000,
   };
 }

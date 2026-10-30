@@ -75,3 +75,22 @@ export async function evaluateAlerts(): Promise<AlertEvaluation> { const at = ne
   } catch (error) { return { alerts: [], evaluatedAt: at, evaluatedSources: [], pendingSources: [error instanceof Error ? error.message : "No se pudo evaluar la base de datos"], persistence: "session" }; } }
 
 export async function updateAlertStatus(id: number, status: AlertStatus) { if (!Number.isInteger(id) || !["new", "reviewed", "resolved"].includes(status)) throw new Error("Solicitud inválida."); const result = await getDb().query(`UPDATE alerts SET status = $1 WHERE id = $2 AND site_url = $3`, [status, id, SITE_URL]); if (!result.rowCount) throw new Error("Alerta no encontrada."); return evaluateAlerts(); }
+
+/** Alertas abiertas para el Resumen. Tolera que la tabla todavía no exista. */
+export async function getOpenAlerts(limit = 8): Promise<Alert[]> {
+  try {
+    const result = await getDb().query<Alert>(
+      `SELECT id, fingerprint, source, rule, entity, severity, title, message, metric,
+              current_value AS "currentValue", previous_value AS "previousValue", variation,
+              detected_at AS "detectedAt", related_url AS "relatedUrl", recommendation, status
+       FROM alerts
+       WHERE site_url = $1 AND status <> 'resolved'
+       ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END, detected_at DESC
+       LIMIT $2`,
+      [SITE_URL, limit],
+    );
+    return result.rows.map((row) => ({ ...row, currentValue: row.currentValue == null ? null : Number(row.currentValue), previousValue: row.previousValue == null ? null : Number(row.previousValue), variation: row.variation == null ? null : Number(row.variation) }));
+  } catch {
+    return [];
+  }
+}

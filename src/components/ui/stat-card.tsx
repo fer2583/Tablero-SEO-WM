@@ -69,7 +69,7 @@ export function StatCard({
         </div>
       ) : null}
 
-      {detail ? <p className="mt-2 text-[10.5px] leading-relaxed text-content-faint">{detail}</p> : null}
+      {detail ? <div className="mt-2 text-[10.5px] leading-relaxed text-content-faint">{detail}</div> : null}
     </article>
   );
 }

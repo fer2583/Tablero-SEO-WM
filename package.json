@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "node --conditions=react-server --import tsx scripts/db-migrate.ts",
+    "db:backfill": "node --conditions=react-server --import tsx scripts/backfill.ts",
     "audit:report": "tsx scripts/audit-report.ts",
     "audit:browser": "node --conditions=react-server --import tsx scripts/audit-browser.ts",
     "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",

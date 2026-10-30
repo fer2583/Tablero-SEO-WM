@@ -43,6 +43,7 @@ function normalize(value: Partial<KeywordsData> | undefined): KeywordsData {
       clicks: entryClicks,
       impressions: entryImpressions,
       share: Number.isFinite(entry.share) ? entry.share : entryClicks ? Math.round((topClicks / entryClicks) * 100) : 0,
+      confidence: entry.confidence ?? ("possible" as const),
     };
   });
   return {

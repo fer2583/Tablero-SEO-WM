@@ -119,6 +119,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     device: (searchParams.get("device") ?? "all") as IntegrationFilters["device"],
     page: searchParams.get("page") ?? undefined,
     query: searchParams.get("query") ?? undefined,
+    compare: (searchParams.get("compare") === "year" ? "year" : "previous") as IntegrationFilters["compare"],
   };
 
   const updateFilter = useCallback(
